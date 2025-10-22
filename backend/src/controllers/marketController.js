@@ -38,3 +38,61 @@ export const getTesouroDireto = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getFundamentals = async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    const fundamentals = await MarketDataService.getFundamentalData(ticker);
+
+    if (!fundamentals) {
+      return res.status(404).json({ error: 'Dados fundamentalistas não encontrados' });
+    }
+
+    res.json(fundamentals);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getHistorical = async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    const { range = '1mo', interval = '1d' } = req.query;
+
+    const historical = await MarketDataService.getHistoricalData(ticker, range, interval);
+
+    if (!historical) {
+      return res.status(404).json({ error: 'Dados históricos não encontrados' });
+    }
+
+    res.json(historical);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getDividends = async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    const dividends = await MarketDataService.getDividendHistory(ticker);
+
+    res.json(dividends);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getStatistics = async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    const statistics = await MarketDataService.getPriceStatistics(ticker);
+
+    if (!statistics) {
+      return res.status(404).json({ error: 'Estatísticas não encontradas' });
+    }
+
+    res.json(statistics);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

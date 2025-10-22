@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import TransactionForm from './components/TransactionForm';
+import Header from './components/layout/Header';
 
-function App() {
+function AppContent() {
   const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const navigate = useNavigate();
 
   const handleTransactionAdded = () => {
     setShowForm(false);
@@ -13,24 +16,31 @@ function App() {
 
   return (
     <div>
-      <header className="header">
-        <div className="container">
-          <h1>Portfolio de Investimentos</h1>
-          <p>Gerencie seus investimentos em ações e renda fixa</p>
-        </div>
-      </header>
+      <Header />
 
       <div className="container">
-        <div style={{ marginBottom: '20px' }}>
-          <button
-            className="btn btn-primary"
-            onClick={() => setShowForm(true)}
-          >
-            + Nova Transação
-          </button>
-        </div>
-
-        <Dashboard key={refreshKey} />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <div style={{ marginBottom: '20px' }}>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => setShowForm(true)}
+                  >
+                    + Nova Transação
+                  </button>
+                </div>
+                <Dashboard key={refreshKey} />
+              </>
+            }
+          />
+          <Route
+            path="/asset/:ticker"
+            element={<div>Asset Details (Coming Soon)</div>}
+          />
+        </Routes>
 
         {showForm && (
           <TransactionForm
@@ -40,6 +50,14 @@ function App() {
         )}
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 

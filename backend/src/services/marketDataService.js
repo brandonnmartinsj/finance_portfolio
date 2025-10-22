@@ -97,6 +97,177 @@ class MarketDataService {
       { name: 'Tesouro Prefixado 2027', ticker: 'PRE-2027', rate: 10.5, price: 890.00 }
     ];
   }
+
+  // Dados fundamentalistas completos
+  static async getFundamentalData(ticker) {
+    try {
+      const brapiToken = process.env.BRAPI_API_KEY || 'demo';
+
+      if (ticker.endsWith('.SA')) {
+        const response = await axios.get(
+          `https://brapi.dev/api/quote/${ticker}`,
+          {
+            params: {
+              token: brapiToken,
+              modules: 'summaryProfile'
+            }
+          }
+        );
+
+        if (response.data && response.data.results && response.data.results.length > 0) {
+          const data = response.data.results[0];
+          return {
+            ticker: data.symbol,
+            companyInfo: {
+              name: data.longName || data.shortName,
+              sector: data.summaryProfile?.sector || 'N/A',
+              industry: data.summaryProfile?.industry || 'N/A',
+              description: data.summaryProfile?.longBusinessSummary || '',
+              website: data.summaryProfile?.website || '',
+              employees: data.summaryProfile?.fullTimeEmployees || 0,
+              address: data.summaryProfile?.address1 || '',
+              city: data.summaryProfile?.city || '',
+              state: data.summaryProfile?.state || '',
+              country: data.summaryProfile?.country || ''
+            },
+            metrics: {
+              priceEarnings: data.priceEarnings || null,
+              earningsPerShare: data.earningsPerShare || null,
+              marketCap: data.marketCap || 0,
+              regularMarketPrice: data.regularMarketPrice || 0,
+              currency: data.currency || 'BRL'
+            },
+            source: 'brapi'
+          };
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`Erro ao buscar dados fundamentalistas de ${ticker}:`, error.message);
+      return null;
+    }
+  }
+
+  // Dados históricos para gráficos (OHLC)
+  static async getHistoricalData(ticker, range = '1mo', interval = '1d') {
+    try {
+      const brapiToken = process.env.BRAPI_API_KEY || 'demo';
+
+      if (ticker.endsWith('.SA')) {
+        const response = await axios.get(
+          `https://brapi.dev/api/quote/${ticker}`,
+          {
+            params: {
+              token: brapiToken,
+              range,
+              interval
+            }
+          }
+        );
+
+        if (response.data && response.data.results && response.data.results.length > 0) {
+          const data = response.data.results[0];
+          return {
+            ticker: data.symbol,
+            range: data.usedRange || range,
+            interval: data.usedInterval || interval,
+            currency: data.currency,
+            data: data.historicalDataPrice || [],
+            validRanges: data.validRanges || [],
+            validIntervals: data.validIntervals || [],
+            source: 'brapi'
+          };
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`Erro ao buscar dados históricos de ${ticker}:`, error.message);
+      return null;
+    }
+  }
+
+  // Histórico de dividendos
+  static async getDividendHistory(ticker) {
+    try {
+      const brapiToken = process.env.BRAPI_API_KEY || 'demo';
+
+      if (ticker.endsWith('.SA')) {
+        const response = await axios.get(
+          `https://brapi.dev/api/quote/${ticker}`,
+          {
+            params: {
+              token: brapiToken,
+              modules: 'dividendsData'
+            }
+          }
+        );
+
+        if (response.data && response.data.results && response.data.results.length > 0) {
+          const data = response.data.results[0];
+          return {
+            ticker: data.symbol,
+            dividends: data.dividendsData?.cashDividends || [],
+            source: 'brapi'
+          };
+        }
+      }
+
+      return { ticker, dividends: [], source: 'brapi' };
+    } catch (error) {
+      console.error(`Erro ao buscar dividendos de ${ticker}:`, error.message);
+      return { ticker, dividends: [], source: 'error' };
+    }
+  }
+
+  // Estatísticas de preço
+  static async getPriceStatistics(ticker) {
+    try {
+      const brapiToken = process.env.BRAPI_API_KEY || 'demo';
+
+      if (ticker.endsWith('.SA')) {
+        const response = await axios.get(
+          `https://brapi.dev/api/quote/${ticker}`,
+          {
+            params: {
+              token: brapiToken
+            }
+          }
+        );
+
+        if (response.data && response.data.results && response.data.results.length > 0) {
+          const data = response.data.results[0];
+          return {
+            ticker: data.symbol,
+            currentPrice: data.regularMarketPrice || 0,
+            currency: data.currency || 'BRL',
+            fiftyTwoWeek: {
+              high: data.fiftyTwoWeekHigh || 0,
+              low: data.fiftyTwoWeekLow || 0,
+              range: data.fiftyTwoWeekRange || ''
+            },
+            regularMarket: {
+              dayHigh: data.regularMarketDayHigh || 0,
+              dayLow: data.regularMarketDayLow || 0,
+              dayRange: data.regularMarketDayRange || '',
+              change: data.regularMarketChange || 0,
+              changePercent: data.regularMarketChangePercent || 0,
+              volume: data.regularMarketVolume || 0,
+              previousClose: data.regularMarketPreviousClose || 0,
+              open: data.regularMarketOpen || 0
+            },
+            source: 'brapi'
+          };
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`Erro ao buscar estatísticas de ${ticker}:`, error.message);
+      return null;
+    }
+  }
 }
 
 export default MarketDataService;

@@ -23,7 +23,12 @@ export const transactionService = {
 export const marketService = {
   getQuote: (ticker) => api.get(`/market/quote/${ticker}`),
   getMultipleQuotes: (tickers) => api.post('/market/quotes', { tickers }),
-  getTesouroDireto: () => api.get('/market/tesouro-direto')
+  getTesouroDireto: () => api.get('/market/tesouro-direto'),
+  getFundamentals: (ticker) => api.get(`/market/fundamentals/${ticker}`),
+  getHistorical: (ticker, range = '1mo', interval = '1d') =>
+    api.get(`/market/historical/${ticker}`, { params: { range, interval } }),
+  getDividends: (ticker) => api.get(`/market/dividends/${ticker}`),
+  getStatistics: (ticker) => api.get(`/market/statistics/${ticker}`)
 };
 
 export default api;
