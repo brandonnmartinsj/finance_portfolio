@@ -191,30 +191,33 @@ class MarketDataService {
   // Histórico de dividendos
   static async getDividendHistory(ticker) {
     try {
-      const brapiToken = process.env.BRAPI_API_KEY || 'demo';
+      // Nota: A API Brapi não disponibiliza dados de dividendos publicamente
+      // Este endpoint retorna dados mockados para demonstração
+      // Em produção, integrar com fonte de dados de dividendos (ex: Fundamentus)
 
-      if (ticker.endsWith('.SA')) {
-        const response = await axios.get(
-          `https://brapi.dev/api/quote/${ticker}`,
-          {
-            params: {
-              token: brapiToken,
-              modules: 'dividendsData'
-            }
-          }
-        );
+      // Dados mockados para demonstração
+      const mockDividends = {
+        'PETR4.SA': [
+          { date: '2024-09-15', value: 1.25, type: 'JCP' },
+          { date: '2024-06-15', value: 1.10, type: 'DIVIDENDO' },
+          { date: '2024-03-15', value: 1.15, type: 'JCP' },
+          { date: '2023-12-15', value: 1.30, type: 'DIVIDENDO' },
+          { date: '2023-09-15', value: 1.20, type: 'JCP' }
+        ],
+        'VALE3.SA': [
+          { date: '2024-09-01', value: 2.50, type: 'DIVIDENDO' },
+          { date: '2024-06-01', value: 2.30, type: 'DIVIDENDO' },
+          { date: '2024-03-01', value: 2.40, type: 'DIVIDENDO' },
+          { date: '2023-12-01', value: 2.60, type: 'DIVIDENDO' }
+        ]
+      };
 
-        if (response.data && response.data.results && response.data.results.length > 0) {
-          const data = response.data.results[0];
-          return {
-            ticker: data.symbol,
-            dividends: data.dividendsData?.cashDividends || [],
-            source: 'brapi'
-          };
-        }
-      }
-
-      return { ticker, dividends: [], source: 'brapi' };
+      return {
+        ticker,
+        dividends: mockDividends[ticker] || [],
+        source: 'mock',
+        note: 'Dados de demonstração. Integrar com fonte real de dividendos.'
+      };
     } catch (error) {
       console.error(`Erro ao buscar dividendos de ${ticker}:`, error.message);
       return { ticker, dividends: [], source: 'error' };
