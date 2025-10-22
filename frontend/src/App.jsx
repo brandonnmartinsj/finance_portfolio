@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
+import AssetDetails from './pages/AssetDetails';
 import TransactionForm from './components/TransactionForm';
 import Header from './components/layout/Header';
 
@@ -38,7 +39,7 @@ function AppContent() {
           />
           <Route
             path="/asset/:ticker"
-            element={<div>Asset Details (Coming Soon)</div>}
+            element={<AssetDetails />}
           />
         </Routes>
 

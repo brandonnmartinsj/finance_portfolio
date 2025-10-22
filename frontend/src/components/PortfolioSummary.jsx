@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function PortfolioSummary({ summary, quotes }) {
+  const navigate = useNavigate();
   const calculateTotals = () => {
     let totalInvested = 0;
     let totalCurrent = 0;
@@ -87,7 +89,19 @@ function PortfolioSummary({ summary, quotes }) {
 
               return (
                 <tr key={item.ticker}>
-                  <td><strong>{item.ticker}</strong></td>
+                  <td>
+                    <strong
+                      onClick={() => navigate(`/asset/${item.ticker}`)}
+                      style={{
+                        cursor: 'pointer',
+                        color: '#0066cc',
+                        textDecoration: 'underline'
+                      }}
+                      title={`Ver detalhes de ${item.ticker}`}
+                    >
+                      {item.ticker}
+                    </strong>
+                  </td>
                   <td>{item.asset_type}</td>
                   <td>{item.total_quantity.toFixed(2)}</td>
                   <td>{formatCurrency(avgPrice)}</td>
