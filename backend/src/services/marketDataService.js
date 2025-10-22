@@ -104,8 +104,9 @@ class MarketDataService {
       const brapiToken = process.env.BRAPI_API_KEY || 'demo';
 
       if (ticker.endsWith('.SA')) {
+        const brapiTicker = ticker.replace('.SA', '');
         const response = await axios.get(
-          `https://brapi.dev/api/quote/${ticker}`,
+          `https://brapi.dev/api/quote/${brapiTicker}`,
           {
             params: {
               token: brapiToken,
@@ -155,8 +156,10 @@ class MarketDataService {
       const brapiToken = process.env.BRAPI_API_KEY || 'demo';
 
       if (ticker.endsWith('.SA')) {
+        // Brapi usa ticker sem o .SA
+        const brapiTicker = ticker.replace('.SA', '');
         const response = await axios.get(
-          `https://brapi.dev/api/quote/${ticker}`,
+          `https://brapi.dev/api/quote/${brapiTicker}`,
           {
             params: {
               token: brapiToken,
@@ -230,8 +233,9 @@ class MarketDataService {
       const brapiToken = process.env.BRAPI_API_KEY || 'demo';
 
       if (ticker.endsWith('.SA')) {
+        const brapiTicker = ticker.replace('.SA', '');
         const response = await axios.get(
-          `https://brapi.dev/api/quote/${ticker}`,
+          `https://brapi.dev/api/quote/${brapiTicker}`,
           {
             params: {
               token: brapiToken
