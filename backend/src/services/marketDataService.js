@@ -4,7 +4,8 @@ class MarketDataService {
   // Brapi - API para mercado brasileiro
   static async getBrazilianStockPrice(ticker) {
     try {
-      const response = await axios.get(`https://brapi.dev/api/quote/${ticker}?token=demo`);
+      const brapiToken = process.env.BRAPI_API_KEY || 'demo';
+      const response = await axios.get(`https://brapi.dev/api/quote/${ticker}?token=${brapiToken}`);
       if (response.data && response.data.results && response.data.results.length > 0) {
         const stock = response.data.results[0];
         return {
