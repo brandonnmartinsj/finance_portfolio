@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { transactionService, marketService } from '../services/api';
 import PortfolioSummary from '../components/PortfolioSummary';
 import TransactionList from '../components/TransactionList';
+import { exportTransactionsToCSV, exportPortfolioToCSV } from '../utils/exportData';
 
 function Dashboard() {
   const [summary, setSummary] = useState([]);
@@ -17,15 +18,12 @@ function Dashboard() {
     try {
       setLoading(true);
 
-      // Carregar resumo do portfolio
       const summaryRes = await transactionService.getSummary();
       setSummary(summaryRes.data);
 
-      // Carregar transações
       const transactionsRes = await transactionService.getAll();
       setTransactions(transactionsRes.data);
 
-      // Carregar cotações dos ativos do portfolio
       if (summaryRes.data.length > 0) {
         const tickers = summaryRes.data.map(item => item.ticker);
         const quotesRes = await marketService.getMultipleQuotes(tickers);
@@ -63,6 +61,41 @@ function Dashboard() {
 
   return (
     <div>
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+        <button
+          onClick={() => exportPortfolioToCSV(summary, quotes)}
+          disabled={summary.length === 0}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: summary.length === 0 ? '#e5e7eb' : '#10b981',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: summary.length === 0 ? 'not-allowed' : 'pointer'
+          }}
+        >
+          📊 Exportar Portfólio
+        </button>
+        <button
+          onClick={() => exportTransactionsToCSV(transactions)}
+          disabled={transactions.length === 0}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: transactions.length === 0 ? '#e5e7eb' : '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: transactions.length === 0 ? 'not-allowed' : 'pointer'
+          }}
+        >
+          📝 Exportar Transações
+        </button>
+      </div>
+
       <PortfolioSummary summary={summary} quotes={quotes} />
       <TransactionList
         transactions={transactions}
