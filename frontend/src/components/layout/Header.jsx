@@ -10,6 +10,16 @@ function Header() {
     return null;
   }
 
+  const navLinkStyle = (path) => ({
+    textDecoration: 'none',
+    fontWeight: location.pathname === path ? 'bold' : 'normal',
+    padding: '8px 16px',
+    borderRadius: '6px',
+    backgroundColor: location.pathname === path ? '#eff6ff' : 'transparent',
+    color: location.pathname === path ? '#1e40af' : '#4b5563',
+    transition: 'all 0.2s'
+  });
+
   return (
     <header className="header">
       <div className="container">
@@ -21,35 +31,17 @@ function Header() {
             <p>Gerencie seus investimentos em ações e renda fixa</p>
           </div>
 
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <Link
-              to="/"
-              className={location.pathname === '/' ? 'nav-link active' : 'nav-link'}
-              style={{
-                textDecoration: 'none',
-                fontWeight: location.pathname === '/' ? 'bold' : 'normal',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                backgroundColor: location.pathname === '/' ? '#eff6ff' : 'transparent',
-                color: location.pathname === '/' ? '#1e40af' : '#4b5563'
-              }}
-            >
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Link to="/" style={navLinkStyle('/')}>
               Dashboard
             </Link>
 
-            <Link
-              to="/analytics"
-              className={location.pathname === '/analytics' ? 'nav-link active' : 'nav-link'}
-              style={{
-                textDecoration: 'none',
-                fontWeight: location.pathname === '/analytics' ? 'bold' : 'normal',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                backgroundColor: location.pathname === '/analytics' ? '#eff6ff' : 'transparent',
-                color: location.pathname === '/analytics' ? '#1e40af' : '#4b5563'
-              }}
-            >
+            <Link to="/analytics" style={navLinkStyle('/analytics')}>
               Análises
+            </Link>
+
+            <Link to="/goals" style={navLinkStyle('/goals')}>
+              Metas
             </Link>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: '20px', paddingLeft: '20px', borderLeft: '1px solid #e5e7eb' }}>

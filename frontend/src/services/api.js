@@ -184,4 +184,58 @@ export const analyticsService = {
   getPortfolioMetrics: () => api.get('/analytics/portfolio-metrics')
 };
 
+/**
+ * Serviço para gerenciamento de metas de investimento
+ */
+export const goalsService = {
+  /**
+   * Retorna todas as metas do usuário
+   * @returns {Promise} Promise com array de metas
+   */
+  getAll: () => api.get('/goals'),
+
+  /**
+   * Retorna apenas metas ativas
+   * @returns {Promise} Promise com array de metas ativas
+   */
+  getActive: () => api.get('/goals/active'),
+
+  /**
+   * Retorna uma meta específica
+   * @param {number} id - ID da meta
+   * @returns {Promise} Promise com dados da meta
+   */
+  getById: (id) => api.get(`/goals/${id}`),
+
+  /**
+   * Cria uma nova meta
+   * @param {Object} data - Dados da meta (title, type, target_amount, etc)
+   * @returns {Promise} Promise com a meta criada
+   */
+  create: (data) => api.post('/goals', data),
+
+  /**
+   * Atualiza uma meta existente
+   * @param {number} id - ID da meta
+   * @param {Object} data - Novos dados da meta
+   * @returns {Promise} Promise com a meta atualizada
+   */
+  update: (id, data) => api.put(`/goals/${id}`, data),
+
+  /**
+   * Remove uma meta
+   * @param {number} id - ID da meta
+   * @returns {Promise} Promise vazia
+   */
+  delete: (id) => api.delete(`/goals/${id}`),
+
+  /**
+   * Atualiza o progresso de uma meta
+   * @param {number} id - ID da meta
+   * @param {number} currentAmount - Valor atual
+   * @returns {Promise} Promise com a meta atualizada
+   */
+  updateProgress: (id, currentAmount) => api.patch(`/goals/${id}/progress`, { current_amount: currentAmount })
+};
+
 export default api;

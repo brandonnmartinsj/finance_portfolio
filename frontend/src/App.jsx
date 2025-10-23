@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
 import AssetDetails from './pages/AssetDetails';
 import Analytics from './pages/Analytics';
+import Goals from './pages/Goals';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import TransactionForm from './components/TransactionForm';
@@ -59,6 +60,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Analytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/goals"
+            element={
+              <ProtectedRoute>
+                <Goals />
               </ProtectedRoute>
             }
           />
