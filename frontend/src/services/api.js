@@ -28,7 +28,8 @@ export const marketService = {
   getHistorical: (ticker, range = '1mo', interval = '1d') =>
     api.get(`/market/historical/${ticker}`, { params: { range, interval } }),
   getDividends: (ticker) => api.get(`/market/dividends/${ticker}`),
-  getStatistics: (ticker) => api.get(`/market/statistics/${ticker}`)
+  getStatistics: (ticker) => api.get(`/market/statistics/${ticker}`),
+  getFundamentusData: (ticker) => api.get(`/market/fundamentus/${ticker}`)
 };
 
 export default api;

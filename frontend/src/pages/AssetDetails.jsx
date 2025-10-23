@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { marketService } from '../services/api';
+import { useFundamentusData } from '../hooks/useFundamentusData';
 import Breadcrumb from '../components/layout/Breadcrumb';
 import ChartControls from '../components/charts/ChartControls';
 import CandlestickChart from '../components/charts/CandlestickChart';
@@ -19,9 +20,13 @@ function AssetDetails() {
   const [historical, setHistorical] = useState(null);
   const [dividends, setDividends] = useState(null);
   const [statistics, setStatistics] = useState(null);
+  const [showFundamentusData, setShowFundamentusData] = useState(false);
 
   const [selectedRange, setSelectedRange] = useState('1mo');
   const [selectedInterval, setSelectedInterval] = useState('1d');
+
+  const { data: fundamentusData, loading: fundamentusLoading, error: fundamentusError } =
+    useFundamentusData(showFundamentusData ? ticker : null);
 
   useEffect(() => {
     loadAssetData();
@@ -155,7 +160,169 @@ function AssetDetails() {
             </div>
           )}
         </div>
+        <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e5e7eb' }}>
+          <button
+            onClick={() => setShowFundamentusData(!showFundamentusData)}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: showFundamentusData ? '#6b7280' : '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            {showFundamentusData ? 'Ocultar' : 'Ver'} Análise Fundamentalista Completa (Fundamentus)
+          </button>
+        </div>
       </div>
+
+      {/* Dados do Fundamentus */}
+      {showFundamentusData && (
+        <div className="card" style={{ marginBottom: '20px' }}>
+          <h2 style={{ marginBottom: '20px' }}>Análise Fundamentalista Detalhada</h2>
+
+          {fundamentusLoading && (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+              Carregando dados do Fundamentus...
+            </div>
+          )}
+
+          {fundamentusError && (
+            <div style={{ padding: '20px', backgroundColor: '#fef2f2', borderRadius: '6px', color: '#dc2626' }}>
+              <strong>Erro ao carregar dados:</strong> {fundamentusError}
+            </div>
+          )}
+
+          {fundamentusData && (
+            <div>
+              {/* Indicadores de Valuation */}
+              <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#1f2937' }}>Indicadores de Valuation</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>P/L</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.valuation.priceToEarnings?.toFixed(2) || 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>P/VP</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.valuation.priceToBook?.toFixed(2) || 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>EV/EBIT</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.valuation.evToEBIT?.toFixed(2) || 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>EV/EBITDA</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.valuation.evToEBITDA?.toFixed(2) || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Indicadores de Rentabilidade */}
+              <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#1f2937' }}>Indicadores de Rentabilidade</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>ROE</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.profitability.roe ? `${fundamentusData.profitability.roe.toFixed(2)}%` : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>ROA</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.profitability.roa ? `${fundamentusData.profitability.roa.toFixed(2)}%` : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>ROIC</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.profitability.roic ? `${fundamentusData.profitability.roic.toFixed(2)}%` : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Margem Líquida</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.profitability.netMargin ? `${fundamentusData.profitability.netMargin.toFixed(2)}%` : 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Balanço Patrimonial */}
+              <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#1f2937' }}>Balanço Patrimonial</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Ativo Total</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.balanceSheet.totalAssets
+                        ? (fundamentusData.balanceSheet.totalAssets / 1_000_000_000).toFixed(2) + 'B'
+                        : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Dívida Bruta</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.balanceSheet.grossDebt
+                        ? (fundamentusData.balanceSheet.grossDebt / 1_000_000_000).toFixed(2) + 'B'
+                        : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Dívida Líquida</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.balanceSheet.netDebt
+                        ? (fundamentusData.balanceSheet.netDebt / 1_000_000_000).toFixed(2) + 'B'
+                        : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Patrimônio Líquido</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.balanceSheet.equity
+                        ? (fundamentusData.balanceSheet.equity / 1_000_000_000).toFixed(2) + 'B'
+                        : 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dividendos */}
+              <div>
+                <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#1f2937' }}>Dividendos</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Dividend Yield</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#16a34a' }}>
+                      {fundamentusData.dividends.dividendYield
+                        ? `${fundamentusData.dividends.dividendYield.toFixed(2)}%`
+                        : 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#eff6ff', borderRadius: '6px' }}>
+                <small style={{ color: '#1e40af' }}>
+                  Fonte: Fundamentus • Atualizado em {new Date(fundamentusData.metadata.scrapedAt).toLocaleString('pt-BR')}
+                </small>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Gráficos */}
       <div className="card" style={{ marginBottom: '20px' }}>

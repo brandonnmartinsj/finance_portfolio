@@ -1,4 +1,5 @@
 import MarketDataService from '../services/marketDataService.js';
+import FundamentusScraperService from '../services/fundamentusScraperService.js';
 
 export const getQuote = async (req, res) => {
   try {
@@ -94,5 +95,25 @@ export const getStatistics = async (req, res) => {
     res.json(statistics);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const getFundamentusData = async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    const data = await FundamentusScraperService.getDetailedData(ticker);
+
+    if (!data) {
+      return res.status(404).json({ error: 'Dados do Fundamentus não encontrados' });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(`Error fetching Fundamentus data for ${req.params.ticker}:`, error.message);
+    res.status(500).json({
+      error: error.message,
+      ticker: req.params.ticker,
+      source: 'fundamentus'
+    });
   }
 };
