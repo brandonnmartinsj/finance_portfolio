@@ -8,15 +8,18 @@ import Goals from './pages/Goals';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import TransactionForm from './components/TransactionForm';
+import ImportTransactions from './components/ImportTransactions';
 import Header from './components/layout/Header';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function AppContent() {
   const [showForm, setShowForm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleTransactionAdded = () => {
     setShowForm(false);
+    setShowImport(false);
     setRefreshKey(prev => prev + 1);
   };
 
@@ -34,12 +37,27 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <>
-                  <div style={{ marginBottom: '20px' }}>
+                  <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
                     <button
                       className="btn btn-primary"
                       onClick={() => setShowForm(true)}
                     >
                       + Nova Transação
+                    </button>
+                    <button
+                      className="btn"
+                      onClick={() => setShowImport(true)}
+                      style={{
+                        backgroundColor: '#10b981',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontWeight: '600'
+                      }}
+                    >
+                      📤 Importar PDF/CSV
                     </button>
                   </div>
                   <Dashboard key={refreshKey} />
@@ -78,6 +96,13 @@ function AppContent() {
         {showForm && (
           <TransactionForm
             onClose={() => setShowForm(false)}
+            onSuccess={handleTransactionAdded}
+          />
+        )}
+
+        {showImport && (
+          <ImportTransactions
+            onClose={() => setShowImport(false)}
             onSuccess={handleTransactionAdded}
           />
         )}
