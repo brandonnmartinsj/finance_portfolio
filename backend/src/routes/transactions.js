@@ -7,8 +7,11 @@ import {
   deleteTransaction,
   getPortfolioSummary
 } from '../controllers/transactionController.js';
+import { authenticateToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
+
+router.use(authenticateToken);
 
 router.get('/', getAllTransactions);
 router.get('/summary', getPortfolioSummary);

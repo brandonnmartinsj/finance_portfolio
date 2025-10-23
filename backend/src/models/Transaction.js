@@ -1,28 +1,29 @@
 import db from '../config/database.js';
 
 class Transaction {
-  static getAll() {
-    const stmt = db.prepare('SELECT * FROM transactions ORDER BY date DESC');
-    return stmt.all();
+  static getAll(userId) {
+    const stmt = db.prepare('SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC');
+    return stmt.all(userId);
   }
 
-  static getById(id) {
-    const stmt = db.prepare('SELECT * FROM transactions WHERE id = ?');
-    return stmt.get(id);
+  static getById(id, userId) {
+    const stmt = db.prepare('SELECT * FROM transactions WHERE id = ? AND user_id = ?');
+    return stmt.get(id, userId);
   }
 
-  static getByTicker(ticker) {
-    const stmt = db.prepare('SELECT * FROM transactions WHERE ticker = ? ORDER BY date DESC');
-    return stmt.all(ticker);
+  static getByTicker(ticker, userId) {
+    const stmt = db.prepare('SELECT * FROM transactions WHERE ticker = ? AND user_id = ? ORDER BY date DESC');
+    return stmt.all(ticker, userId);
   }
 
-  static create(transaction) {
+  static create(transaction, userId) {
     const stmt = db.prepare(`
-      INSERT INTO transactions (type, asset_type, ticker, quantity, price, date, fees, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO transactions (user_id, type, asset_type, ticker, quantity, price, date, fees, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = stmt.run(
+      userId,
       transaction.type,
       transaction.asset_type,
       transaction.ticker,
@@ -33,14 +34,14 @@ class Transaction {
       transaction.notes || null
     );
 
-    return { id: result.lastInsertRowid, ...transaction };
+    return { id: result.lastInsertRowid, ...transaction, user_id: userId };
   }
 
-  static update(id, transaction) {
+  static update(id, transaction, userId) {
     const stmt = db.prepare(`
       UPDATE transactions
       SET type = ?, asset_type = ?, ticker = ?, quantity = ?, price = ?, date = ?, fees = ?, notes = ?
-      WHERE id = ?
+      WHERE id = ? AND user_id = ?
     `);
 
     stmt.run(
@@ -52,18 +53,19 @@ class Transaction {
       transaction.date,
       transaction.fees || 0,
       transaction.notes || null,
-      id
+      id,
+      userId
     );
 
-    return this.getById(id);
+    return this.getById(id, userId);
   }
 
-  static delete(id) {
-    const stmt = db.prepare('DELETE FROM transactions WHERE id = ?');
-    return stmt.run(id);
+  static delete(id, userId) {
+    const stmt = db.prepare('DELETE FROM transactions WHERE id = ? AND user_id = ?');
+    return stmt.run(id, userId);
   }
 
-  static getPortfolioSummary() {
+  static getPortfolioSummary(userId) {
     const stmt = db.prepare(`
       SELECT
         ticker,
@@ -71,11 +73,12 @@ class Transaction {
         SUM(CASE WHEN type = 'BUY' THEN quantity ELSE -quantity END) as total_quantity,
         SUM(CASE WHEN type = 'BUY' THEN quantity * price ELSE -quantity * price END) as total_invested
       FROM transactions
+      WHERE user_id = ?
       GROUP BY ticker, asset_type
       HAVING total_quantity > 0
     `);
 
-    return stmt.all();
+    return stmt.all(userId);
   }
 }
 

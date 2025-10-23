@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import transactionRoutes from './routes/transactions.js';
 import marketRoutes from './routes/market.js';
+import authRoutes from './routes/auth.js';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas
+app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/market', marketRoutes);
 

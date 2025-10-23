@@ -15,8 +15,18 @@ const db = new Database(join(dataDir, 'portfolio.db'));
 
 // Criar tabelas se não existirem
 db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    name TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+
   CREATE TABLE IF NOT EXISTS transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     type TEXT NOT NULL,
     asset_type TEXT NOT NULL,
     ticker TEXT NOT NULL,
@@ -25,7 +35,8 @@ db.exec(`
     date TEXT NOT NULL,
     fees REAL DEFAULT 0,
     notes TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 
   CREATE TABLE IF NOT EXISTS assets (
@@ -35,6 +46,8 @@ db.exec(`
     market TEXT NOT NULL
   );
 
+  CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+  CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
   CREATE INDEX IF NOT EXISTS idx_transactions_ticker ON transactions(ticker);
   CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
 `);
