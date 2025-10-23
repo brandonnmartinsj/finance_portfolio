@@ -299,6 +299,78 @@ function AssetDetails() {
                 </div>
               </div>
 
+              {/* Demonstrativo de Resultados (DRE) */}
+              <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#1f2937' }}>Demonstrativo de Resultados (DRE)</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+                  {/* Últimos 12 meses */}
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px', color: '#374151' }}>
+                      Últimos 12 meses
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Receita Líquida</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>
+                          {fundamentusData.incomeStatement.last12Months.revenue
+                            ? 'R$ ' + (fundamentusData.incomeStatement.last12Months.revenue / 1_000_000).toFixed(2) + 'M'
+                            : 'N/A'}
+                        </div>
+                      </div>
+                      <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>EBIT</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>
+                          {fundamentusData.incomeStatement.last12Months.ebit
+                            ? 'R$ ' + (fundamentusData.incomeStatement.last12Months.ebit / 1_000_000).toFixed(2) + 'M'
+                            : 'N/A'}
+                        </div>
+                      </div>
+                      <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Lucro Líquido</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#16a34a' }}>
+                          {fundamentusData.incomeStatement.last12Months.netIncome
+                            ? 'R$ ' + (fundamentusData.incomeStatement.last12Months.netIncome / 1_000_000).toFixed(2) + 'M'
+                            : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Últimos 3 meses */}
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px', color: '#374151' }}>
+                      Últimos 3 meses
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Receita Líquida</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>
+                          {fundamentusData.incomeStatement.last3Months.revenue
+                            ? 'R$ ' + (fundamentusData.incomeStatement.last3Months.revenue / 1_000_000).toFixed(2) + 'M'
+                            : 'N/A'}
+                        </div>
+                      </div>
+                      <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>EBIT</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>
+                          {fundamentusData.incomeStatement.last3Months.ebit
+                            ? 'R$ ' + (fundamentusData.incomeStatement.last3Months.ebit / 1_000_000).toFixed(2) + 'M'
+                            : 'N/A'}
+                        </div>
+                      </div>
+                      <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Lucro Líquido</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#16a34a' }}>
+                          {fundamentusData.incomeStatement.last3Months.netIncome
+                            ? 'R$ ' + (fundamentusData.incomeStatement.last3Months.netIncome / 1_000_000).toFixed(2) + 'M'
+                            : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Dividendos */}
               <div>
                 <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#1f2937' }}>Dividendos</h3>

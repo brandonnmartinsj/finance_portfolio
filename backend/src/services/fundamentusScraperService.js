@@ -47,6 +47,8 @@ class FundamentusScraperService {
       const cells = $(row).find('td');
 
       for (let i = 0; i < cells.length; i += 2) {
+        if (i + 1 >= cells.length) break;
+
         const labelCell = $(cells[i]);
         const valueCell = $(cells[i + 1]);
 
@@ -56,7 +58,7 @@ class FundamentusScraperService {
         const label = (labelSpan.length > 0 ? labelSpan.text() : labelCell.text()).trim().replace('?', '');
         const value = (valueSpan.length > 0 ? valueSpan.text() : valueCell.text()).trim();
 
-        if (label && value) {
+        if (label && value && label !== 'Oscilações' && label !== 'Oscila��es') {
           data[label] = value;
         }
       }
@@ -175,6 +177,65 @@ class FundamentusScraperService {
     };
   }
 
+  static parseIncomeStatementTable($) {
+    const tables = $('table.w728');
+    const result = {
+      last12Months: { revenue: null, ebit: null, netIncome: null },
+      last3Months: { revenue: null, ebit: null, netIncome: null }
+    };
+
+    tables.each((tableIndex, table) => {
+      const header = $(table).find('tr').first().text();
+
+      if (header.includes('Dados demonstrativos') || header.includes('resultados')) {
+        const rows = $(table).find('tr');
+
+        rows.each((rowIndex, row) => {
+          const cells = $(row).find('td');
+
+          if (rowIndex >= 2) {
+            const label = $(cells[0]).find('span.txt').text().trim();
+
+            if (label.includes('Receita')) {
+              result.last12Months.revenue = this.normalizeValue(
+                $(cells[1]).find('span.txt').text().trim()
+              );
+              if (cells[3]) {
+                result.last3Months.revenue = this.normalizeValue(
+                  $(cells[3]).find('span.txt').text().trim()
+                );
+              }
+            }
+
+            if (label === 'EBIT') {
+              result.last12Months.ebit = this.normalizeValue(
+                $(cells[1]).find('span.txt').text().trim()
+              );
+              if (cells[3]) {
+                result.last3Months.ebit = this.normalizeValue(
+                  $(cells[3]).find('span.txt').text().trim()
+                );
+              }
+            }
+
+            if (label.includes('Lucro')) {
+              result.last12Months.netIncome = this.normalizeValue(
+                $(cells[1]).find('span.txt').text().trim()
+              );
+              if (cells[3]) {
+                result.last3Months.netIncome = this.normalizeValue(
+                  $(cells[3]).find('span.txt').text().trim()
+                );
+              }
+            }
+          }
+        });
+      }
+    });
+
+    return result;
+  }
+
   static parseIncomeStatement($, rawData) {
     return {
       last12Months: {
@@ -244,7 +305,7 @@ class FundamentusScraperService {
         growth: this.parseGrowth($, allData),
         efficiency: this.parseEfficiency($, allData),
         balanceSheet: this.parseBalanceSheet($, allData),
-        incomeStatement: this.parseIncomeStatement($, allData),
+        incomeStatement: this.parseIncomeStatementTable($),
         perShare: this.parsePerShare($, allData),
         metadata: {
           source: 'fundamentus',
