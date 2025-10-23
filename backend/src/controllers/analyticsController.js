@@ -8,13 +8,27 @@ import MarketDataService from '../services/marketDataService.js';
 export const getPortfolioEvolution = async (req, res) => {
   try {
     const userId = req.user.id;
-    const transactions = Transaction.getAll(userId);
+    const { startDate, endDate } = req.query;
+
+    let transactions = Transaction.getAll(userId);
 
     if (transactions.length === 0) {
       return res.json([]);
     }
 
-    const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+    let sortedTransactions = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (startDate || endDate) {
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+
+      sortedTransactions = sortedTransactions.filter(tx => {
+        const txDate = new Date(tx.date);
+        if (start && txDate < start) return false;
+        if (end && txDate > end) return false;
+        return true;
+      });
+    }
 
     const tickers = [...new Set(transactions.map(t => t.ticker))];
     const quotes = await MarketDataService.getMultipleQuotes(tickers);
