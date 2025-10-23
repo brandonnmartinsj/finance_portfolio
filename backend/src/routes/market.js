@@ -7,7 +7,8 @@ import {
   getHistorical,
   getDividends,
   getStatistics,
-  getFundamentusData
+  getFundamentusData,
+  getFundamentusDividends
 } from '../controllers/marketController.js';
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.get('/historical/:ticker', getHistorical);
 router.get('/dividends/:ticker', getDividends);
 router.get('/statistics/:ticker', getStatistics);
 router.get('/fundamentus/:ticker', getFundamentusData);
+router.get('/fundamentus-dividends/:ticker', getFundamentusDividends);
 
 export default router;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
-function DividendHistory({ dividends, currency = 'BRL' }) {
+function DividendHistory({ dividends, yearlyTotals, currency = 'BRL', source = 'brapi' }) {
   if (!dividends || dividends.length === 0) {
     return (
       <div className="card">
@@ -13,9 +13,18 @@ function DividendHistory({ dividends, currency = 'BRL' }) {
     );
   }
 
+  const parseDateString = (dateStr) => {
+    if (!dateStr) return new Date(0);
+    if (dateStr.includes('/')) {
+      const [day, month, year] = dateStr.split('/');
+      return new Date(year, month - 1, day);
+    }
+    return new Date(dateStr);
+  };
+
   const sortedDividends = [...dividends].sort((a, b) => {
-    const dateA = new Date(a.date || a.paymentDate);
-    const dateB = new Date(b.date || b.paymentDate);
+    const dateA = parseDateString(a.date || a.paymentDate);
+    const dateB = parseDateString(b.date || b.paymentDate);
     return dateB - dateA;
   });
 
@@ -60,10 +69,11 @@ function DividendHistory({ dividends, currency = 'BRL' }) {
               const date = dividend.date || dividend.paymentDate;
               const value = dividend.rate || dividend.value || 0;
               const type = dividend.type || 'DIVIDENDO';
+              const displayDate = date.includes && date.includes('/') ? date : formatDate(date);
 
               return (
                 <tr key={index}>
-                  <td>{formatDate(date)}</td>
+                  <td>{displayDate}</td>
                   <td>
                     <span
                       style={{
@@ -94,6 +104,32 @@ function DividendHistory({ dividends, currency = 'BRL' }) {
         </p>
       )}
 
+      {yearlyTotals && yearlyTotals.length > 0 && (
+        <div style={{ marginTop: '20px' }}>
+          <h3 style={{ fontSize: '16px', marginBottom: '10px' }}>Totais por Ano</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Ano</th>
+                  <th style={{ textAlign: 'right' }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {yearlyTotals.map((yt) => (
+                  <tr key={yt.year}>
+                    <td>{yt.year}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#15803d' }}>
+                      {formatCurrency(yt.total, currency)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
         <h4 style={{ fontSize: '14px', marginBottom: '10px', color: '#1e40af' }}>
           💡 Sobre Dividendos
@@ -103,6 +139,11 @@ function DividendHistory({ dividends, currency = 'BRL' }) {
           <li><strong>JCP:</strong> Juros sobre Capital Próprio (tem retenção de IR na fonte)</li>
           <li><strong>Dividend Yield:</strong> Dividendos anuais divididos pelo preço da ação</li>
         </ul>
+        {source === 'fundamentus' && (
+          <p style={{ marginTop: '10px', fontSize: '12px', color: '#1e40af', fontStyle: 'italic' }}>
+            Fonte: Fundamentus.com.br
+          </p>
+        )}
       </div>
     </div>
   );

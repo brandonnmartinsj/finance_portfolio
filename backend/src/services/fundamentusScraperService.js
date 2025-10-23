@@ -258,6 +258,102 @@ class FundamentusScraperService {
     };
   }
 
+  static async getDividendsData(ticker) {
+    try {
+      const cleanTicker = ticker.replace('.SA', '').toUpperCase();
+      const url = `${FUNDAMENTUS_BASE_URL}/proventos.php?papel=${cleanTicker}&tipo=2`;
+
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+        },
+        timeout: 10000
+      });
+
+      if (response.status !== 200) {
+        throw new Error(`Failed to fetch data: HTTP ${response.status}`);
+      }
+
+      const $ = cheerio.load(response.data);
+      const tables = $('table');
+
+      if (tables.length === 0) {
+        throw new Error('No dividend tables found');
+      }
+
+      const dividends = [];
+      const yearlyTotals = [];
+
+      tables.each((tableIdx, table) => {
+        const headers = $(table).find('thead tr th, tr th');
+        const isDetailTable = headers.length === 5;
+        const isYearlyTable = headers.length === 2;
+
+        if (isDetailTable) {
+          $(table).find('tbody tr, tr').each((rowIdx, row) => {
+            const cells = $(row).find('td');
+            if (cells.length === 5) {
+              const date = $(cells[0]).text().trim();
+              const value = $(cells[1]).text().trim();
+              const type = $(cells[2]).text().trim();
+              const paymentDate = $(cells[3]).text().trim();
+              const perShares = $(cells[4]).text().trim();
+
+              if (date && date !== 'Data' && value) {
+                dividends.push({
+                  date,
+                  value: this.convertToNumber(value),
+                  type,
+                  paymentDate: paymentDate === '-' ? null : paymentDate,
+                  perShares: parseInt(perShares) || 1
+                });
+              }
+            }
+          });
+        }
+
+        if (isYearlyTable) {
+          $(table).find('tbody tr, tr').each((rowIdx, row) => {
+            const cells = $(row).find('td');
+            if (cells.length === 2) {
+              const year = $(cells[0]).text().trim();
+              const value = $(cells[1]).text().trim();
+
+              if (year && year !== 'Ano' && value) {
+                yearlyTotals.push({
+                  year: parseInt(year),
+                  total: this.convertToNumber(value)
+                });
+              }
+            }
+          });
+        }
+      });
+
+      return {
+        ticker: cleanTicker,
+        dividends: dividends.sort((a, b) => {
+          const dateA = a.date.split('/').reverse().join('');
+          const dateB = b.date.split('/').reverse().join('');
+          return dateB.localeCompare(dateA);
+        }),
+        yearlyTotals: yearlyTotals.sort((a, b) => b.year - a.year),
+        metadata: {
+          source: 'fundamentus',
+          scrapedAt: new Date().toISOString(),
+          url
+        }
+      };
+    } catch (error) {
+      if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+        throw new Error('Request timeout - Fundamentus may be slow or unavailable');
+      }
+      throw error;
+    }
+  }
+
   static async getDetailedData(ticker) {
     try {
       const cleanTicker = ticker.replace('.SA', '').toUpperCase();

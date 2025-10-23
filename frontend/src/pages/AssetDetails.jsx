@@ -19,6 +19,7 @@ function AssetDetails() {
   const [fundamentals, setFundamentals] = useState(null);
   const [historical, setHistorical] = useState(null);
   const [dividends, setDividends] = useState(null);
+  const [fundamentusDividends, setFundamentusDividends] = useState(null);
   const [statistics, setStatistics] = useState(null);
   const [showFundamentusData, setShowFundamentusData] = useState(false);
 
@@ -41,14 +42,16 @@ function AssetDetails() {
       setLoading(true);
       setError(null);
 
-      const [fundamentalsRes, dividendsRes, statisticsRes] = await Promise.all([
+      const [fundamentalsRes, dividendsRes, fundamentusDividendsRes, statisticsRes] = await Promise.all([
         marketService.getFundamentals(ticker),
         marketService.getDividends(ticker),
+        marketService.getFundamentusDividends(ticker).catch(() => null),
         marketService.getStatistics(ticker)
       ]);
 
       setFundamentals(fundamentalsRes.data);
       setDividends(dividendsRes.data);
+      setFundamentusDividends(fundamentusDividendsRes?.data || null);
       setStatistics(statisticsRes.data);
     } catch (err) {
       console.error('Erro ao carregar dados do ativo:', err);
@@ -517,10 +520,12 @@ function AssetDetails() {
       {fundamentals?.metrics && <FinancialMetrics metrics={fundamentals.metrics} />}
 
       {/* Histórico de Dividendos */}
-      {dividends && (
+      {(fundamentusDividends || dividends) && (
         <DividendHistory
-          dividends={dividends.dividends}
+          dividends={fundamentusDividends?.dividends || dividends.dividends}
+          yearlyTotals={fundamentusDividends?.yearlyTotals}
           currency={fundamentals?.metrics?.currency || 'BRL'}
+          source={fundamentusDividends ? 'fundamentus' : 'brapi'}
         />
       )}
 

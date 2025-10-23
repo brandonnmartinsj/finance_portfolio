@@ -117,3 +117,23 @@ export const getFundamentusData = async (req, res) => {
     });
   }
 };
+
+export const getFundamentusDividends = async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    const data = await FundamentusScraperService.getDividendsData(ticker);
+
+    if (!data) {
+      return res.status(404).json({ error: 'Dados de dividendos não encontrados' });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(`Error fetching dividends for ${req.params.ticker}:`, error.message);
+    res.status(500).json({
+      error: error.message,
+      ticker: req.params.ticker,
+      source: 'fundamentus'
+    });
+  }
+};
