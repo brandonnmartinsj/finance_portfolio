@@ -1,7 +1,11 @@
 import axios from 'axios';
 
 class MarketDataService {
-  // Brapi - API para mercado brasileiro
+  /**
+   * Busca cotação de ações brasileiras na API Brapi
+   * @param {string} ticker - Código do ativo (ex: PETR4.SA)
+   * @returns {Promise<Object|null>} Dados da cotação ou null se não encontrado
+   */
   static async getBrazilianStockPrice(ticker) {
     try {
       const brapiToken = process.env.BRAPI_API_KEY || 'demo';
@@ -23,7 +27,11 @@ class MarketDataService {
     }
   }
 
-  // Yahoo Finance - API para mercado americano e outros
+  /**
+   * Busca cotação de ações internacionais no Yahoo Finance
+   * @param {string} ticker - Código do ativo (ex: AAPL, GOOGL)
+   * @returns {Promise<Object|null>} Dados da cotação ou null se não encontrado
+   */
   static async getStockPrice(ticker) {
     try {
       // Usando uma API alternativa gratuita do Yahoo Finance
@@ -58,7 +66,12 @@ class MarketDataService {
     }
   }
 
-  // Método unificado que tenta Brapi primeiro (para ações brasileiras) e depois Yahoo
+  /**
+   * Busca cotação de um ativo usando a fonte apropriada
+   * Tenta Brapi primeiro para ações brasileiras (.SA), depois Yahoo Finance
+   * @param {string} ticker - Código do ativo
+   * @returns {Promise<Object|null>} Dados da cotação ou null se não encontrado
+   */
   static async getQuote(ticker) {
     // Se terminar com .SA, é ação brasileira
     if (ticker.endsWith('.SA')) {
@@ -70,7 +83,11 @@ class MarketDataService {
     return await this.getStockPrice(ticker);
   }
 
-  // Buscar cotações de múltiplos ativos
+  /**
+   * Busca cotações de múltiplos ativos em paralelo
+   * @param {string[]} tickers - Array com códigos dos ativos
+   * @returns {Promise<Object[]>} Array com cotações (inclui erros quando não encontrado)
+   */
   static async getMultipleQuotes(tickers) {
     const promises = tickers.map(ticker => this.getQuote(ticker));
     const results = await Promise.allSettled(promises);
@@ -87,7 +104,11 @@ class MarketDataService {
     });
   }
 
-  // Dados do Tesouro Direto (mock - idealmente usar API do Tesouro)
+  /**
+   * Retorna taxas do Tesouro Direto
+   * @todo Integrar com API oficial do Tesouro Direto
+   * @returns {Promise<Object[]>} Array com dados dos títulos (mock data)
+   */
   static async getTesouroDiretoRates() {
     // Aqui você pode integrar com a API oficial do Tesouro Direto
     // Por enquanto, retornando dados mock
@@ -98,7 +119,12 @@ class MarketDataService {
     ];
   }
 
-  // Dados fundamentalistas completos
+  /**
+   * Busca dados fundamentalistas completos de um ativo
+   * Inclui informações da empresa, setor, métricas financeiras
+   * @param {string} ticker - Código do ativo
+   * @returns {Promise<Object|null>} Dados fundamentalistas ou null se não encontrado
+   */
   static async getFundamentalData(ticker) {
     try {
       const brapiToken = process.env.BRAPI_API_KEY || 'demo';
@@ -151,7 +177,13 @@ class MarketDataService {
     }
   }
 
-  // Dados históricos para gráficos (OHLC)
+  /**
+   * Busca dados históricos de preço para gráficos
+   * @param {string} ticker - Código do ativo
+   * @param {string} range - Período (ex: '1mo', '3mo', '1y')
+   * @param {string} interval - Intervalo (ex: '1d', '1wk')
+   * @returns {Promise<Object|null>} Dados históricos OHLC ou null se não encontrado
+   */
   static async getHistoricalData(ticker, range = '1mo', interval = '1d') {
     try {
       const brapiToken = process.env.BRAPI_API_KEY || 'demo';
@@ -192,7 +224,12 @@ class MarketDataService {
     }
   }
 
-  // Histórico de dividendos
+  /**
+   * Retorna histórico de dividendos de um ativo
+   * @todo Integrar com fonte real de dividendos (ex: Fundamentus)
+   * @param {string} ticker - Código do ativo
+   * @returns {Promise<Object>} Objeto com histórico de dividendos (mock data)
+   */
   static async getDividendHistory(ticker) {
     try {
       // Nota: A API Brapi não disponibiliza dados de dividendos publicamente
@@ -228,7 +265,12 @@ class MarketDataService {
     }
   }
 
-  // Estatísticas de preço
+  /**
+   * Busca estatísticas de preço de um ativo
+   * Inclui máxima/mínima 52 semanas, volume, variação
+   * @param {string} ticker - Código do ativo
+   * @returns {Promise<Object|null>} Estatísticas de preço ou null se não encontrado
+   */
   static async getPriceStatistics(ticker) {
     try {
       const brapiToken = process.env.BRAPI_API_KEY || 'demo';

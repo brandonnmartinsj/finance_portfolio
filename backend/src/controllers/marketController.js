@@ -1,6 +1,14 @@
 import MarketDataService from '../services/marketDataService.js';
 import FundamentusScraperService from '../services/fundamentusScraperService.js';
 
+/**
+ * Retorna cotação atual de um ativo
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Parâmetros da URL
+ * @param {string} req.params.ticker - Código do ativo
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com dados de cotação ou erro 404
+ */
 export const getQuote = async (req, res) => {
   try {
     const { ticker } = req.params;
@@ -16,6 +24,14 @@ export const getQuote = async (req, res) => {
   }
 };
 
+/**
+ * Retorna cotações de múltiplos ativos em uma única requisição
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Corpo da requisição
+ * @param {string[]} req.body.tickers - Array com códigos dos ativos
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com array de cotações
+ */
 export const getMultipleQuotes = async (req, res) => {
   try {
     const { tickers } = req.body;
@@ -31,6 +47,12 @@ export const getMultipleQuotes = async (req, res) => {
   }
 };
 
+/**
+ * Retorna taxas e preços atuais do Tesouro Direto
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com dados do Tesouro Direto
+ */
 export const getTesouroDireto = async (req, res) => {
   try {
     const rates = await MarketDataService.getTesouroDiretoRates();
@@ -40,6 +62,14 @@ export const getTesouroDireto = async (req, res) => {
   }
 };
 
+/**
+ * Retorna dados fundamentalistas de um ativo
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Parâmetros da URL
+ * @param {string} req.params.ticker - Código do ativo
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com dados fundamentalistas ou erro 404
+ */
 export const getFundamentals = async (req, res) => {
   try {
     const { ticker } = req.params;
@@ -55,6 +85,17 @@ export const getFundamentals = async (req, res) => {
   }
 };
 
+/**
+ * Retorna dados históricos de preço (OHLC) para gráficos
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Parâmetros da URL
+ * @param {string} req.params.ticker - Código do ativo
+ * @param {Object} req.query - Query parameters
+ * @param {string} req.query.range - Período (ex: '1mo', '3mo', '1y')
+ * @param {string} req.query.interval - Intervalo (ex: '1d', '1wk')
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com dados históricos ou erro 404
+ */
 export const getHistorical = async (req, res) => {
   try {
     const { ticker } = req.params;
@@ -72,6 +113,14 @@ export const getHistorical = async (req, res) => {
   }
 };
 
+/**
+ * Retorna histórico de dividendos e proventos de um ativo
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Parâmetros da URL
+ * @param {string} req.params.ticker - Código do ativo
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com histórico de dividendos
+ */
 export const getDividends = async (req, res) => {
   try {
     const { ticker } = req.params;
@@ -83,6 +132,15 @@ export const getDividends = async (req, res) => {
   }
 };
 
+/**
+ * Retorna estatísticas de preço de um ativo
+ * Inclui máxima/mínima 52 semanas, volume, variação diária
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Parâmetros da URL
+ * @param {string} req.params.ticker - Código do ativo
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com estatísticas de preço ou erro 404
+ */
 export const getStatistics = async (req, res) => {
   try {
     const { ticker } = req.params;
@@ -98,6 +156,15 @@ export const getStatistics = async (req, res) => {
   }
 };
 
+/**
+ * Retorna dados completos do Fundamentus (scraping)
+ * Inclui indicadores fundamentalistas e informações da empresa
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Parâmetros da URL
+ * @param {string} req.params.ticker - Código do ativo
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com dados do Fundamentus ou erro 404
+ */
 export const getFundamentusData = async (req, res) => {
   try {
     const { ticker } = req.params;
@@ -118,6 +185,14 @@ export const getFundamentusData = async (req, res) => {
   }
 };
 
+/**
+ * Retorna histórico completo de dividendos do Fundamentus
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Parâmetros da URL
+ * @param {string} req.params.ticker - Código do ativo
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com histórico de dividendos do Fundamentus ou erro 404
+ */
 export const getFundamentusDividends = async (req, res) => {
   try {
     const { ticker } = req.params;
