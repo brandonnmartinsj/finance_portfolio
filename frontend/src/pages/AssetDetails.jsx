@@ -120,21 +120,41 @@ function AssetDetails() {
       {/* Header do Ativo */}
       <div className="card" style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexWrap: 'wrap', gap: '20px' }}>
-          <div>
-            <h1 style={{ fontSize: '28px', marginBottom: '5px' }}>
-              {fundamentals?.companyInfo?.name || ticker}
-            </h1>
-            <p style={{ color: '#666', marginBottom: '10px' }}>{ticker}</p>
-            {fundamentals?.companyInfo && (
-              <div style={{ display: 'flex', gap: '15px', fontSize: '14px' }}>
-                <span>
-                  <strong>Setor:</strong> {fundamentals.companyInfo.sector}
-                </span>
-                <span>
-                  <strong>Indústria:</strong> {fundamentals.companyInfo.industry}
-                </span>
-              </div>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'start' }}>
+            {fundamentals?.companyInfo?.logoUrl && (
+              <img
+                src={fundamentals.companyInfo.logoUrl}
+                alt={`${fundamentals.companyInfo.name} logo`}
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  objectFit: 'contain',
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  padding: '8px',
+                  backgroundColor: '#fff'
+                }}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
             )}
+            <div>
+              <h1 style={{ fontSize: '28px', marginBottom: '5px' }}>
+                {fundamentals?.companyInfo?.name || ticker}
+              </h1>
+              <p style={{ color: '#666', marginBottom: '10px' }}>{ticker}</p>
+              {fundamentals?.companyInfo && (
+                <div style={{ display: 'flex', gap: '15px', fontSize: '14px' }}>
+                  <span>
+                    <strong>Setor:</strong> {fundamentals.companyInfo.sector}
+                  </span>
+                  <span>
+                    <strong>Indústria:</strong> {fundamentals.companyInfo.industry}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {statistics && (

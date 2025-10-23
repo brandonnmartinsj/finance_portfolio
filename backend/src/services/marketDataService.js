@@ -129,7 +129,8 @@ class MarketDataService {
               address: data.summaryProfile?.address1 || '',
               city: data.summaryProfile?.city || '',
               state: data.summaryProfile?.state || '',
-              country: data.summaryProfile?.country || ''
+              country: data.summaryProfile?.country || '',
+              logoUrl: data.logourl || `https://icons.brapi.dev/icons/${data.symbol}.svg`
             },
             metrics: {
               priceEarnings: data.priceEarnings || null,
