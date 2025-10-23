@@ -260,6 +260,56 @@ function AssetDetails() {
                 </div>
               </div>
 
+              {/* Dados por Ação */}
+              <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#1f2937' }}>Dados por Ação</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>LPA (Lucro por Ação)</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.perShare.earnings
+                        ? `R$ ${fundamentusData.perShare.earnings.toFixed(2)}`
+                        : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>VPA (Valor Patrimonial por Ação)</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.perShare.bookValue
+                        ? `R$ ${fundamentusData.perShare.bookValue.toFixed(2)}`
+                        : 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Crescimento e Eficiência */}
+              <div style={{ marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#1f2937' }}>Crescimento e Eficiência</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Crescimento Receita (5 anos)</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.growth.revenue5y
+                        ? `${fundamentusData.growth.revenue5y.toFixed(2)}%`
+                        : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Giro Ativos</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.efficiency.assetTurnover?.toFixed(2) || 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Liquidez Corrente</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.efficiency.currentRatio?.toFixed(2) || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Balanço Patrimonial */}
               <div style={{ marginBottom: '30px' }}>
                 <h3 style={{ fontSize: '18px', marginBottom: '15px', color: '#1f2937' }}>Balanço Patrimonial</h3>
@@ -268,31 +318,47 @@ function AssetDetails() {
                     <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Ativo Total</div>
                     <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
                       {fundamentusData.balanceSheet.totalAssets
-                        ? (fundamentusData.balanceSheet.totalAssets / 1_000_000_000).toFixed(2) + 'B'
+                        ? 'R$ ' + (fundamentusData.balanceSheet.totalAssets / 1_000_000_000).toFixed(2) + 'B'
+                        : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Disponibilidades</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.balanceSheet.cash
+                        ? 'R$ ' + (fundamentusData.balanceSheet.cash / 1_000_000_000).toFixed(2) + 'B'
+                        : 'N/A'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Ativo Circulante</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {fundamentusData.balanceSheet.currentAssets
+                        ? 'R$ ' + (fundamentusData.balanceSheet.currentAssets / 1_000_000_000).toFixed(2) + 'B'
                         : 'N/A'}
                     </div>
                   </div>
                   <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
                     <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Dívida Bruta</div>
-                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#dc2626' }}>
                       {fundamentusData.balanceSheet.grossDebt
-                        ? (fundamentusData.balanceSheet.grossDebt / 1_000_000_000).toFixed(2) + 'B'
+                        ? 'R$ ' + (fundamentusData.balanceSheet.grossDebt / 1_000_000_000).toFixed(2) + 'B'
                         : 'N/A'}
                     </div>
                   </div>
                   <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
                     <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Dívida Líquida</div>
-                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#dc2626' }}>
                       {fundamentusData.balanceSheet.netDebt
-                        ? (fundamentusData.balanceSheet.netDebt / 1_000_000_000).toFixed(2) + 'B'
+                        ? 'R$ ' + (fundamentusData.balanceSheet.netDebt / 1_000_000_000).toFixed(2) + 'B'
                         : 'N/A'}
                     </div>
                   </div>
                   <div style={{ padding: '15px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
                     <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '5px' }}>Patrimônio Líquido</div>
-                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#16a34a' }}>
                       {fundamentusData.balanceSheet.equity
-                        ? (fundamentusData.balanceSheet.equity / 1_000_000_000).toFixed(2) + 'B'
+                        ? 'R$ ' + (fundamentusData.balanceSheet.equity / 1_000_000_000).toFixed(2) + 'B'
                         : 'N/A'}
                     </div>
                   </div>
