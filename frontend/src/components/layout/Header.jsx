@@ -27,13 +27,32 @@ function Header() {
               className={location.pathname === '/' ? 'nav-link active' : 'nav-link'}
               style={{
                 textDecoration: 'none',
-                fontWeight: location.pathname === '/' ? 'bold' : 'normal'
+                fontWeight: location.pathname === '/' ? 'bold' : 'normal',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                backgroundColor: location.pathname === '/' ? '#eff6ff' : 'transparent',
+                color: location.pathname === '/' ? '#1e40af' : '#4b5563'
               }}
             >
               Dashboard
             </Link>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Link
+              to="/analytics"
+              className={location.pathname === '/analytics' ? 'nav-link active' : 'nav-link'}
+              style={{
+                textDecoration: 'none',
+                fontWeight: location.pathname === '/analytics' ? 'bold' : 'normal',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                backgroundColor: location.pathname === '/analytics' ? '#eff6ff' : 'transparent',
+                color: location.pathname === '/analytics' ? '#1e40af' : '#4b5563'
+              }}
+            >
+              Análises
+            </Link>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: '20px', paddingLeft: '20px', borderLeft: '1px solid #e5e7eb' }}>
               <span style={{ fontSize: '14px' }}>Olá, {user?.name}</span>
               <button
                 onClick={logout}

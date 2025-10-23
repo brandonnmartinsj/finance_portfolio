@@ -149,4 +149,39 @@ export const marketService = {
   getFundamentusDividends: (ticker) => api.get(`/market/fundamentus-dividends/${ticker}`)
 };
 
+/**
+ * Serviço para analytics e métricas do portfólio
+ */
+export const analyticsService = {
+  /**
+   * Retorna evolução patrimonial ao longo do tempo
+   * @returns {Promise} Promise com array de dados históricos
+   */
+  getPortfolioEvolution: () => api.get('/analytics/portfolio-evolution'),
+
+  /**
+   * Retorna distribuição do portfólio por ativo
+   * @returns {Promise} Promise com distribuição por ticker
+   */
+  getAssetDistribution: () => api.get('/analytics/asset-distribution'),
+
+  /**
+   * Retorna distribuição por tipo de ativo
+   * @returns {Promise} Promise com distribuição por tipo
+   */
+  getAssetTypeDistribution: () => api.get('/analytics/asset-type-distribution'),
+
+  /**
+   * Retorna performance de cada ativo (top gainers/losers)
+   * @returns {Promise} Promise com performance individual
+   */
+  getTopPerformers: () => api.get('/analytics/top-performers'),
+
+  /**
+   * Retorna métricas consolidadas do portfólio
+   * @returns {Promise} Promise com métricas (total investido, valor atual, etc)
+   */
+  getPortfolioMetrics: () => api.get('/analytics/portfolio-metrics')
+};
+
 export default api;

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import transactionRoutes from './routes/transactions.js';
 import marketRoutes from './routes/market.js';
 import authRoutes from './routes/auth.js';
+import analyticsRoutes from './routes/analytics.js';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/market', marketRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Rota de status
 app.get('/api/health', (req, res) => {
