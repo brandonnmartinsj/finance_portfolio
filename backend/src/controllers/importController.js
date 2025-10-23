@@ -7,23 +7,41 @@ import Asset from '../models/Asset.js';
  */
 export const uploadAndParsePDF = async (req, res) => {
   try {
+    console.log('📄 Upload PDF request received');
+    console.log('Headers:', req.headers);
+    console.log('Has file?', !!req.file);
+    console.log('Body:', req.body);
+
     if (!req.file) {
+      console.error('❌ No file in request');
       return res.status(400).json({ error: 'Nenhum arquivo enviado' });
     }
 
+    console.log('File info:', {
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    });
+
     if (req.file.mimetype !== 'application/pdf') {
+      console.error('❌ Invalid mimetype:', req.file.mimetype);
       return res.status(400).json({ error: 'Apenas arquivos PDF são aceitos' });
     }
 
+    console.log('✅ PDF file validated, parsing...');
     const buffer = req.file.buffer;
     const result = await PDFParserService.parseGenericPDF(buffer);
+    console.log('Parse result:', result);
 
     if (!result.success || result.transactions.length === 0) {
+      console.error('❌ No transactions found or parse failed');
       return res.status(400).json({
         error: 'Nenhuma transação encontrada no PDF',
         details: result.warning
       });
     }
+
+    console.log('✅ Transactions found:', result.transactions.length);
 
     const validation = PDFParserService.validateTransactions(result.transactions);
 

@@ -1,6 +1,6 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
 
 /**
  * Serviço para parsing de PDFs de corretoras
@@ -12,31 +12,50 @@ class PDFParserService {
    */
   static async parseBastterPDF(buffer) {
     try {
-      const data = await pdfParse(buffer);
-      const text = data.text;
+      const parser = new PDFParse({ data: buffer });
+      const result = await parser.getText();
+      await parser.destroy();
+
+      const text = result.text || '';
 
       const transactions = [];
       const lines = text.split('\n');
 
-      // Padrões para identificar transações
-      // Exemplo: "01/01/2024 PETR4 C 100 25.50 2550.00 5.00"
-      const transactionPattern = /(\d{2}\/\d{2}\/\d{4})\s+([A-Z0-9]{4,6})\s+([CV])\s+(\d+(?:\.\d+)?)\s+(\d+(?:,\d+)?)\s+(\d+(?:,\d+)?)/;
+      // Padrão do Bastter System:
+      // Linha com ticker: "BBAS3 \t75 \t0,00"
+      // Seguida de linhas de transação: "Compra \t02/06/2025 \t45,000 \t1.061,00 \t-"
+      let currentTicker = null;
 
-      for (const line of lines) {
-        const match = line.match(transactionPattern);
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
 
-        if (match) {
-          const [_, date, ticker, type, quantity, price, total] = match;
+        // Detectar linha de ticker (ticker seguido de tabs e números)
+        const tickerMatch = line.match(/^([A-Z]{4}\d{1,2})\s+\t/);
+        if (tickerMatch) {
+          currentTicker = tickerMatch[1];
+          continue;
+        }
+
+        // Detectar linha de transação
+        // Formato: "Compra \t02/06/2025 \t45,000 \t1.061,00 \t-"
+        const transactionMatch = line.match(/(Compra|Venda)\s+\t(\d{2}\/\d{2}\/\d{4})\s+\t([\d,]+)\s+\t([\d.,]+)/);
+
+        if (transactionMatch && currentTicker) {
+          const [_, operation, date, quantity, total] = transactionMatch;
+
+          const qty = parseFloat(quantity.replace(',', '.'));
+          const totalValue = parseFloat(total.replace(/\./g, '').replace(',', '.'));
+          const price = totalValue / qty;
 
           transactions.push({
             date: this.convertDateFormat(date),
-            ticker: ticker.trim(),
-            type: type === 'C' ? 'BUY' : 'SELL',
-            quantity: parseFloat(quantity.replace(',', '.')),
-            price: parseFloat(price.replace(',', '.')),
-            total: parseFloat(total.replace(',', '.')),
-            asset_type: this.detectAssetType(ticker),
-            fees: 0, // Será calculado posteriormente se houver info de taxas
+            ticker: currentTicker,
+            type: operation === 'Compra' ? 'BUY' : 'SELL',
+            quantity: qty,
+            price: parseFloat(price.toFixed(2)),
+            total: totalValue,
+            asset_type: this.detectAssetType(currentTicker),
+            fees: 0,
             notes: `Importado de PDF Bastter`
           });
         }
@@ -71,8 +90,11 @@ class PDFParserService {
    */
   static async parseGenericPDF(buffer) {
     try {
-      const data = await pdfParse(buffer);
-      const text = data.text;
+      const parser = new PDFParse({ data: buffer });
+      const result = await parser.getText();
+      await parser.destroy();
+
+      const text = result.text || '';
 
       // Tentar identificar o formato baseado em palavras-chave
       if (text.includes('BASTTER') || text.includes('Bastter')) {
