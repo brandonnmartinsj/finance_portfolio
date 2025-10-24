@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { transactionService } from '../services/api';
+import TickerSearch from './TickerSearch';
 
 function TransactionForm({ onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -29,9 +30,24 @@ function TransactionForm({ onClose, onSuccess }) {
       if (value === 'ACAO_BR' || value === 'RENDA_FIXA') {
         setFormData(prev => ({ ...prev, market: 'BR' }));
       } else if (value === 'ACAO_US') {
-        setFormData(prev => ({ ...prev, market: 'US' }));
+        setFormData(prev => ({ ...prev, market: 'US', ticker: '', name: '' }));
       }
     }
+  };
+
+  const handleTickerSelect = (data) => {
+    setFormData(prev => ({
+      ...prev,
+      ticker: data.ticker,
+      name: data.name || data.ticker
+    }));
+  };
+
+  const handleTickerChange = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      ticker: value
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -39,8 +55,19 @@ function TransactionForm({ onClose, onSuccess }) {
     setLoading(true);
 
     try {
+      let ticker = formData.ticker.trim().toUpperCase();
+
+      if (formData.asset_type === 'ACAO_BR' && !ticker.endsWith('.SA')) {
+        ticker = `${ticker}.SA`;
+      }
+
+      if (formData.asset_type === 'ACAO_US' && ticker.endsWith('.SA')) {
+        ticker = ticker.replace('.SA', '');
+      }
+
       const data = {
         ...formData,
+        ticker,
         quantity: parseFloat(formData.quantity),
         price: parseFloat(formData.price),
         fees: parseFloat(formData.fees || 0)
@@ -89,25 +116,49 @@ function TransactionForm({ onClose, onSuccess }) {
           </div>
 
           <div className="form-group">
-            <label>Ticker</label>
-            <input
-              type="text"
-              name="ticker"
-              value={formData.ticker}
-              onChange={handleChange}
-              placeholder="Ex: PETR4.SA, AAPL, IPCA-2035"
-              required
-            />
+            <label>
+              Ticker
+              {formData.asset_type === 'ACAO_US' && (
+                <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: '8px' }}>
+                  (Digite para buscar)
+                </span>
+              )}
+            </label>
+            {formData.asset_type === 'ACAO_US' ? (
+              <TickerSearch
+                value={formData.ticker}
+                onChange={handleTickerChange}
+                onSelect={handleTickerSelect}
+                assetType={formData.asset_type}
+                placeholder="Ex: AAPL, MSFT, GOOGL..."
+              />
+            ) : (
+              <input
+                type="text"
+                name="ticker"
+                value={formData.ticker}
+                onChange={handleChange}
+                placeholder="Ex: PETR4.SA, IPCA-2035"
+                required
+              />
+            )}
           </div>
 
           <div className="form-group">
-            <label>Nome do Ativo</label>
+            <label>
+              Nome do Ativo
+              {formData.asset_type === 'ACAO_US' && formData.name && (
+                <span style={{ fontSize: '12px', color: '#16a34a', marginLeft: '8px' }}>
+                  ✓ Auto-preenchido
+                </span>
+              )}
+            </label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Ex: Petrobras PN, Apple Inc"
+              placeholder={formData.asset_type === 'ACAO_US' ? 'Será preenchido automaticamente' : 'Ex: Petrobras PN'}
               required
             />
           </div>

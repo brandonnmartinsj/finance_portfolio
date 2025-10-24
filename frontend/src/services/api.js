@@ -146,7 +146,14 @@ export const marketService = {
    * @param {string} ticker - Código do ativo
    * @returns {Promise} Promise com histórico completo de dividendos
    */
-  getFundamentusDividends: (ticker) => api.get(`/market/fundamentus-dividends/${ticker}`)
+  getFundamentusDividends: (ticker) => api.get(`/market/fundamentus-dividends/${ticker}`),
+
+  /**
+   * Busca símbolos por termo de pesquisa
+   * @param {string} query - Termo de busca (nome da empresa ou ticker)
+   * @returns {Promise} Promise com array de símbolos encontrados
+   */
+  searchSymbol: (query) => api.get('/market/search', { params: { q: query } })
 };
 
 /**
