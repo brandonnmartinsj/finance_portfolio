@@ -18,8 +18,8 @@ class Transaction {
 
   static create(transaction, userId) {
     const stmt = db.prepare(`
-      INSERT INTO transactions (user_id, type, asset_type, ticker, quantity, price, date, fees, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO transactions (user_id, type, asset_type, ticker, quantity, price, date, fees, notes, currency, original_price, exchange_rate)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = stmt.run(
@@ -31,7 +31,10 @@ class Transaction {
       transaction.price,
       transaction.date,
       transaction.fees || 0,
-      transaction.notes || null
+      transaction.notes || null,
+      transaction.currency || 'BRL',
+      transaction.original_price || transaction.price,
+      transaction.exchange_rate || 1.0
     );
 
     return { id: result.lastInsertRowid, ...transaction, user_id: userId };
@@ -40,7 +43,7 @@ class Transaction {
   static update(id, transaction, userId) {
     const stmt = db.prepare(`
       UPDATE transactions
-      SET type = ?, asset_type = ?, ticker = ?, quantity = ?, price = ?, date = ?, fees = ?, notes = ?
+      SET type = ?, asset_type = ?, ticker = ?, quantity = ?, price = ?, date = ?, fees = ?, notes = ?, currency = ?, original_price = ?, exchange_rate = ?
       WHERE id = ? AND user_id = ?
     `);
 
@@ -53,6 +56,9 @@ class Transaction {
       transaction.date,
       transaction.fees || 0,
       transaction.notes || null,
+      transaction.currency || 'BRL',
+      transaction.original_price || transaction.price,
+      transaction.exchange_rate || 1.0,
       id,
       userId
     );

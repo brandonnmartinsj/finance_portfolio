@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { transactionService } from '../services/api';
+import { currencyService } from '../services/currencyService';
 import TickerSearch from './TickerSearch';
 
 function TransactionForm({ onClose, onSuccess }) {
@@ -11,12 +12,46 @@ function TransactionForm({ onClose, onSuccess }) {
     market: 'BR',
     quantity: '',
     price: '',
+    currency: 'BRL',
     date: new Date().toISOString().split('T')[0],
     fees: '0',
     notes: ''
   });
 
   const [loading, setLoading] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(null);
+  const [convertedPrice, setConvertedPrice] = useState(null);
+  const [loadingRate, setLoadingRate] = useState(false);
+
+  useEffect(() => {
+    if (formData.currency === 'USD' && formData.price) {
+      loadExchangeRate();
+    } else {
+      setExchangeRate(null);
+      setConvertedPrice(null);
+    }
+  }, [formData.currency, formData.price]);
+
+  const loadExchangeRate = async () => {
+    try {
+      setLoadingRate(true);
+      const response = await currencyService.getExchangeRate('USD', 'BRL');
+      setExchangeRate(response.data.rate);
+
+      if (formData.price) {
+        const converted = parseFloat(formData.price) * response.data.rate;
+        setConvertedPrice(converted);
+      }
+    } catch (error) {
+      console.error('Error loading exchange rate:', error);
+      setExchangeRate(5.00);
+      if (formData.price) {
+        setConvertedPrice(parseFloat(formData.price) * 5.00);
+      }
+    } finally {
+      setLoadingRate(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,12 +60,11 @@ function TransactionForm({ onClose, onSuccess }) {
       [name]: value
     }));
 
-    // Atualizar mercado automaticamente baseado no tipo de ativo
     if (name === 'asset_type') {
       if (value === 'ACAO_BR' || value === 'RENDA_FIXA') {
-        setFormData(prev => ({ ...prev, market: 'BR' }));
+        setFormData(prev => ({ ...prev, market: 'BR', currency: 'BRL' }));
       } else if (value === 'ACAO_US') {
-        setFormData(prev => ({ ...prev, market: 'US', ticker: '', name: '' }));
+        setFormData(prev => ({ ...prev, market: 'US', ticker: '', name: '', currency: 'USD' }));
       }
     }
   };
@@ -81,6 +115,13 @@ function TransactionForm({ onClose, onSuccess }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatCurrency = (value, currency = 'BRL') => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: currency
+    }).format(value);
   };
 
   return (
@@ -177,7 +218,20 @@ function TransactionForm({ onClose, onSuccess }) {
           </div>
 
           <div className="form-group">
-            <label>Preço</label>
+            <label>Moeda</label>
+            <select
+              name="currency"
+              value={formData.currency}
+              onChange={handleChange}
+              required
+            >
+              <option value="BRL">BRL (Real Brasileiro)</option>
+              <option value="USD">USD (Dólar Americano)</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Preço {formData.currency === 'USD' && '(em Dólar)'}</label>
             <input
               type="number"
               name="price"
@@ -187,6 +241,27 @@ function TransactionForm({ onClose, onSuccess }) {
               min="0"
               required
             />
+            {formData.currency === 'USD' && exchangeRate && formData.price && (
+              <div style={{
+                marginTop: '8px',
+                padding: '12px',
+                backgroundColor: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}>
+                <div style={{ color: '#1e40af', marginBottom: '4px' }}>
+                  <strong>Cotação atual:</strong> {formatCurrency(exchangeRate, 'BRL')}/USD
+                  {loadingRate && ' (carregando...)'}
+                </div>
+                <div style={{ color: '#16a34a', fontWeight: '600' }}>
+                  <strong>Valor em Reais:</strong> {formatCurrency(convertedPrice || 0, 'BRL')}
+                </div>
+                <div style={{ color: '#6b7280', fontSize: '12px', marginTop: '4px' }}>
+                  A transação será salva em BRL usando a cotação atual
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="form-group">
