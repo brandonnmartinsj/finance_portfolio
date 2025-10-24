@@ -53,9 +53,23 @@ class BenchmarkService {
       return null;
     }
 
-    const currentYear = new Date().getFullYear();
-    const yearKey = year ? `annual${year}` : `annual${currentYear}`;
-    const benchmarkReturn = benchmark[yearKey] || 0;
+    let yearKey;
+    let benchmarkReturn = 0;
+
+    if (year) {
+      yearKey = `annual${year}`;
+      benchmarkReturn = benchmark[yearKey] || 0;
+    } else {
+      const currentYear = new Date().getFullYear();
+      const availableYears = Object.keys(benchmark)
+        .filter(key => key.startsWith('annual'))
+        .map(key => parseInt(key.replace('annual', '')))
+        .sort((a, b) => b - a);
+
+      const targetYear = availableYears.find(y => y <= currentYear) || availableYears[0];
+      yearKey = `annual${targetYear}`;
+      benchmarkReturn = benchmark[yearKey] || 0;
+    }
 
     const alpha = portfolioReturn - benchmarkReturn;
     const relativePerformance = benchmarkReturn !== 0
