@@ -1,4 +1,5 @@
 import Dividend from '../models/Dividend.js';
+import DividendSyncService from '../services/dividendSyncService.js';
 
 export const getAllDividends = async (req, res) => {
   try {
@@ -119,5 +120,22 @@ export const getYearlyDividends = async (req, res) => {
   } catch (error) {
     console.error('Error fetching yearly dividends:', error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const syncDividends = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    console.log(`Starting dividend sync for user ${userId}...`);
+    const result = await DividendSyncService.syncAllDividends(userId);
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error syncing dividends:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 };

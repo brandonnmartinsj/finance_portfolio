@@ -2,12 +2,57 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 
-const DividendAnalysis = ({ data, currency = 'BRL' }) => {
+const DividendAnalysis = ({ data, currency = 'BRL', onSync, isSyncing = false }) => {
   if (!data || !data.summary) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-        <p>Sem dados de dividendos disponíveis</p>
-        <small>Registre seus dividendos para acompanhar sua renda passiva</small>
+      <div className="card" style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2 style={{ margin: 0 }}>Análise de Dividendos</h2>
+          {onSync && (
+            <button
+              onClick={onSync}
+              disabled={isSyncing}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: isSyncing ? '#9ca3af' : '#2563eb',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: isSyncing ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              {isSyncing ? (
+                <>
+                  <span>Sincronizando...</span>
+                  <div style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid white',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                  </svg>
+                  Sincronizar Dividendos
+                </>
+              )}
+            </button>
+          )}
+        </div>
+        <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+          <p>Sem dados de dividendos disponíveis</p>
+          <small>Clique em "Sincronizar Dividendos" para buscar automaticamente os dividendos dos seus ativos</small>
+        </div>
       </div>
     );
   }
@@ -41,7 +86,49 @@ const DividendAnalysis = ({ data, currency = 'BRL' }) => {
 
   return (
     <div className="card" style={{ marginBottom: '20px' }}>
-      <h2 style={{ marginBottom: '20px' }}>Análise de Dividendos</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2 style={{ margin: 0 }}>Análise de Dividendos</h2>
+        {onSync && (
+          <button
+            onClick={onSync}
+            disabled={isSyncing}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: isSyncing ? '#9ca3af' : '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: isSyncing ? 'not-allowed' : 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            {isSyncing ? (
+              <>
+                <span>Sincronizando...</span>
+                <div style={{
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid white',
+                  borderTopColor: 'transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }}></div>
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                </svg>
+                Sincronizar Dividendos
+              </>
+            )}
+          </button>
+        )}
+      </div>
 
       {/* Summary Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>

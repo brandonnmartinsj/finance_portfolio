@@ -7,7 +7,8 @@ import {
   deleteDividend,
   getDividendSummary,
   getMonthlyDividends,
-  getYearlyDividends
+  getYearlyDividends,
+  syncDividends
 } from '../controllers/dividendController.js';
 import { authenticateToken } from '../middleware/authMiddleware.js';
 
@@ -19,6 +20,7 @@ router.get('/', getAllDividends);
 router.get('/summary', getDividendSummary);
 router.get('/monthly', getMonthlyDividends);
 router.get('/yearly', getYearlyDividends);
+router.post('/sync', syncDividends);
 router.get('/:id', getDividendById);
 router.post('/', createDividend);
 router.put('/:id', updateDividend);

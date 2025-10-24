@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAnalyticsData } from '../hooks/useAnalytics';
+import { dividendService } from '../services/api';
 import ErrorBoundary from '../components/ErrorBoundary';
 import PeriodFilter from '../components/PeriodFilter';
 import ExportButton from '../components/ExportButton';
@@ -16,6 +17,7 @@ const Analytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('ALL');
   const [customRange, setCustomRange] = useState({ startDate: '', endDate: '' });
   const [dateFilter, setDateFilter] = useState({ startDate: null, endDate: null });
+  const [isSyncingDividends, setIsSyncingDividends] = useState(false);
 
   const { portfolioEvolution, assetDistribution, assetTypeDistribution, sectorDistribution, dividendAnalysis, riskMetrics, topPerformers, metrics, isLoading, error, refetch } = useAnalyticsData(dateFilter);
 
@@ -23,6 +25,26 @@ const Analytics = () => {
     setSelectedPeriod(period);
     if (range) {
       setDateFilter(range);
+    }
+  };
+
+  const handleSyncDividends = async () => {
+    setIsSyncingDividends(true);
+    try {
+      const response = await dividendService.sync();
+      console.log('Dividend sync result:', response.data);
+
+      if (response.data.success) {
+        alert(`Sincronização concluída!\n\n${response.data.message}\n\nAtivos processados: ${response.data.summary.tickersProcessed}\nDividendos sincronizados: ${response.data.summary.totalSynced}\nDividendos ignorados (duplicados): ${response.data.summary.totalSkipped}`);
+        refetch();
+      } else {
+        alert('Erro ao sincronizar dividendos: ' + response.data.error);
+      }
+    } catch (error) {
+      console.error('Error syncing dividends:', error);
+      alert('Erro ao sincronizar dividendos. Tente novamente.');
+    } finally {
+      setIsSyncingDividends(false);
     }
   };
 
@@ -173,7 +195,11 @@ const Analytics = () => {
         {isLoading ? (
           <ChartSkeleton height={400} />
         ) : (
-          <DividendAnalysis data={dividendAnalysis} />
+          <DividendAnalysis
+            data={dividendAnalysis}
+            onSync={handleSyncDividends}
+            isSyncing={isSyncingDividends}
+          />
         )}
 
         {isLoading ? (

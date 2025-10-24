@@ -185,6 +185,64 @@ export const analyticsService = {
 };
 
 /**
+ * Serviço para gerenciamento de dividendos
+ */
+export const dividendService = {
+  /**
+   * Retorna todos os dividendos
+   * @returns {Promise} Promise com array de dividendos
+   */
+  getAll: () => api.get('/dividends'),
+
+  /**
+   * Retorna resumo de dividendos agrupados por ticker
+   * @returns {Promise} Promise com resumo por ticker
+   */
+  getSummary: () => api.get('/dividends/summary'),
+
+  /**
+   * Retorna dividendos mensais
+   * @param {number} year - Ano para filtrar (opcional)
+   * @returns {Promise} Promise com totais mensais
+   */
+  getMonthly: (year) => api.get('/dividends/monthly', { params: { year } }),
+
+  /**
+   * Retorna dividendos anuais
+   * @returns {Promise} Promise com totais anuais
+   */
+  getYearly: () => api.get('/dividends/yearly'),
+
+  /**
+   * Sincroniza dividendos a partir das transações
+   * @returns {Promise} Promise com resultado da sincronização
+   */
+  sync: () => api.post('/dividends/sync'),
+
+  /**
+   * Cria um novo dividendo
+   * @param {Object} data - Dados do dividendo
+   * @returns {Promise} Promise com o dividendo criado
+   */
+  create: (data) => api.post('/dividends', data),
+
+  /**
+   * Atualiza um dividendo existente
+   * @param {number} id - ID do dividendo
+   * @param {Object} data - Novos dados do dividendo
+   * @returns {Promise} Promise com o dividendo atualizado
+   */
+  update: (id, data) => api.put(`/dividends/${id}`, data),
+
+  /**
+   * Remove um dividendo
+   * @param {number} id - ID do dividendo
+   * @returns {Promise} Promise vazia
+   */
+  delete: (id) => api.delete(`/dividends/${id}`)
+};
+
+/**
  * Serviço para gerenciamento de metas de investimento
  */
 export const goalsService = {
