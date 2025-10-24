@@ -43,7 +43,8 @@ db.exec(`
     ticker TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     type TEXT NOT NULL,
-    market TEXT NOT NULL
+    market TEXT NOT NULL,
+    sector TEXT
   );
 
   CREATE TABLE IF NOT EXISTS goals (
@@ -61,12 +62,28 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 
+  CREATE TABLE IF NOT EXISTS dividends (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    ticker TEXT NOT NULL,
+    type TEXT NOT NULL,
+    amount REAL NOT NULL,
+    payment_date TEXT NOT NULL,
+    ex_date TEXT,
+    notes TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
   CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
   CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
   CREATE INDEX IF NOT EXISTS idx_transactions_ticker ON transactions(ticker);
   CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
   CREATE INDEX IF NOT EXISTS idx_goals_user_id ON goals(user_id);
   CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(status);
+  CREATE INDEX IF NOT EXISTS idx_dividends_user_id ON dividends(user_id);
+  CREATE INDEX IF NOT EXISTS idx_dividends_ticker ON dividends(ticker);
+  CREATE INDEX IF NOT EXISTS idx_dividends_payment_date ON dividends(payment_date);
 `);
 
 export default db;

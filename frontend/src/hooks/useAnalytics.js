@@ -29,6 +29,9 @@ const ANALYTICS_KEYS = {
   assetTypeDistribution: 'assetTypeDistribution',
   topPerformers: 'topPerformers',
   portfolioMetrics: 'portfolioMetrics',
+  sectorDistribution: 'sectorDistribution',
+  dividendAnalysis: 'dividendAnalysis',
+  riskMetrics: 'riskMetrics',
 };
 
 export const usePortfolioEvolution = (filters = {}) => {
@@ -90,26 +93,65 @@ export const usePortfolioMetrics = () => {
   });
 };
 
+export const useSectorDistribution = () => {
+  return useQuery({
+    queryKey: [ANALYTICS_KEYS.sectorDistribution],
+    queryFn: async () => {
+      const response = await api.get('/analytics/sector-distribution');
+      return response.data;
+    },
+  });
+};
+
+export const useDividendAnalysis = () => {
+  return useQuery({
+    queryKey: [ANALYTICS_KEYS.dividendAnalysis],
+    queryFn: async () => {
+      const response = await api.get('/analytics/dividend-analysis');
+      return response.data;
+    },
+  });
+};
+
+export const useRiskMetrics = () => {
+  return useQuery({
+    queryKey: [ANALYTICS_KEYS.riskMetrics],
+    queryFn: async () => {
+      const response = await api.get('/analytics/risk-metrics');
+      return response.data;
+    },
+  });
+};
+
 export const useAnalyticsData = (filters = {}) => {
   const portfolioEvolution = usePortfolioEvolution(filters);
   const assetDistribution = useAssetDistribution();
   const assetTypeDistribution = useAssetTypeDistribution();
   const topPerformers = useTopPerformers();
   const metrics = usePortfolioMetrics();
+  const sectorDistribution = useSectorDistribution();
+  const dividendAnalysis = useDividendAnalysis();
+  const riskMetrics = useRiskMetrics();
 
   const isLoading =
     portfolioEvolution.isLoading ||
     assetDistribution.isLoading ||
     assetTypeDistribution.isLoading ||
     topPerformers.isLoading ||
-    metrics.isLoading;
+    metrics.isLoading ||
+    sectorDistribution.isLoading ||
+    dividendAnalysis.isLoading ||
+    riskMetrics.isLoading;
 
   const error =
     portfolioEvolution.error ||
     assetDistribution.error ||
     assetTypeDistribution.error ||
     topPerformers.error ||
-    metrics.error;
+    metrics.error ||
+    sectorDistribution.error ||
+    dividendAnalysis.error ||
+    riskMetrics.error;
 
   const refetch = () => {
     portfolioEvolution.refetch();
@@ -117,6 +159,9 @@ export const useAnalyticsData = (filters = {}) => {
     assetTypeDistribution.refetch();
     topPerformers.refetch();
     metrics.refetch();
+    sectorDistribution.refetch();
+    dividendAnalysis.refetch();
+    riskMetrics.refetch();
   };
 
   return {
@@ -125,6 +170,9 @@ export const useAnalyticsData = (filters = {}) => {
     assetTypeDistribution: assetTypeDistribution.data || [],
     topPerformers: topPerformers.data || [],
     metrics: metrics.data || null,
+    sectorDistribution: sectorDistribution.data || [],
+    dividendAnalysis: dividendAnalysis.data || null,
+    riskMetrics: riskMetrics.data || null,
     isLoading,
     error,
     refetch,

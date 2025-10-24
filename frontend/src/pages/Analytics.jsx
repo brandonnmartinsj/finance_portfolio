@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { useAnalyticsData } from '../hooks/useAnalytics';
 import ErrorBoundary from '../components/ErrorBoundary';
 import PeriodFilter from '../components/PeriodFilter';
+import ExportButton from '../components/ExportButton';
 import PortfolioEvolution from '../components/analytics/PortfolioEvolution';
 import AssetDistribution from '../components/analytics/AssetDistribution';
 import AssetTypeDistribution from '../components/analytics/AssetTypeDistribution';
+import SectorDistribution from '../components/analytics/SectorDistribution';
+import DividendAnalysis from '../components/analytics/DividendAnalysis';
+import RiskAndPerformance from '../components/analytics/RiskAndPerformance';
 import TopPerformers from '../components/analytics/TopPerformers';
 import { MetricsSkeleton, ChartSkeleton, TableSkeleton } from '../components/Skeleton';
 
@@ -13,7 +17,7 @@ const Analytics = () => {
   const [customRange, setCustomRange] = useState({ startDate: '', endDate: '' });
   const [dateFilter, setDateFilter] = useState({ startDate: null, endDate: null });
 
-  const { portfolioEvolution, assetDistribution, assetTypeDistribution, topPerformers, metrics, isLoading, error, refetch } = useAnalyticsData(dateFilter);
+  const { portfolioEvolution, assetDistribution, assetTypeDistribution, sectorDistribution, dividendAnalysis, riskMetrics, topPerformers, metrics, isLoading, error, refetch } = useAnalyticsData(dateFilter);
 
   const handlePeriodChange = (period, range) => {
     setSelectedPeriod(period);
@@ -52,9 +56,16 @@ const Analytics = () => {
   return (
     <ErrorBoundary fallbackMessage="Erro ao carregar a análise do portfólio." onRetry={refetch}>
       <div>
-        <div style={{ marginBottom: '20px' }}>
-          <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>Análise de Portfólio</h1>
-          <p style={{ color: '#666' }}>Visualize a performance e distribuição dos seus investimentos</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>Análise de Portfólio</h1>
+            <p style={{ color: '#666' }}>Visualize a performance e distribuição dos seus investimentos</p>
+          </div>
+          <ExportButton
+            data={{ portfolioEvolution, assetDistribution, sectorDistribution, topPerformers, metrics }}
+            type="analytics"
+            disabled={isLoading || !metrics}
+          />
         </div>
 
         <PeriodFilter
@@ -152,6 +163,24 @@ const Analytics = () => {
             </>
           )}
         </div>
+
+        {isLoading ? (
+          <ChartSkeleton height={400} />
+        ) : (
+          <SectorDistribution data={sectorDistribution} />
+        )}
+
+        {isLoading ? (
+          <ChartSkeleton height={400} />
+        ) : (
+          <DividendAnalysis data={dividendAnalysis} />
+        )}
+
+        {isLoading ? (
+          <ChartSkeleton height={400} />
+        ) : (
+          <RiskAndPerformance data={riskMetrics} />
+        )}
 
         {isLoading ? (
           <TableSkeleton rows={5} />
