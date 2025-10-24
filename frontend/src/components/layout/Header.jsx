@@ -36,6 +36,10 @@ function Header() {
               Dashboard
             </Link>
 
+            <Link to="/dashboard" style={navLinkStyle('/dashboard')}>
+              Dashboard Personalizável
+            </Link>
+
             <Link to="/analytics" style={navLinkStyle('/analytics')}>
               Análises
             </Link>

@@ -8,6 +8,7 @@ import analyticsRoutes from './routes/analytics.js';
 import goalsRoutes from './routes/goals.js';
 import importRoutes from './routes/import.js';
 import dividendRoutes from './routes/dividends.js';
+import dashboardLayoutRoutes from './routes/dashboardLayouts.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/goals', goalsRoutes);
 app.use('/api/import', importRoutes);
 app.use('/api/dividends', dividendRoutes);
+app.use('/api/dashboard-layouts', dashboardLayoutRoutes);
 
 // Rota de status
 app.get('/api/health', (req, res) => {

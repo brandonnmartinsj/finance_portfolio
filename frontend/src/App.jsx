@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
+import DashboardNew from './pages/DashboardNew';
 import AssetDetails from './pages/AssetDetails';
 import Analytics from './pages/Analytics';
 import Goals from './pages/Goals';
@@ -66,6 +68,14 @@ function AppContent() {
             }
           />
           <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardNew />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/asset/:ticker"
             element={
               <ProtectedRoute>
@@ -114,9 +124,11 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
