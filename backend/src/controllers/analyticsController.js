@@ -305,7 +305,7 @@ export const getSectorDistribution = async (req, res) => {
       if (q.price) priceMap[q.ticker] = q.price;
     });
 
-    const sectorDistribution = SectorService.getSectorDistribution(summary, priceMap);
+    const sectorDistribution = await SectorService.getSectorDistribution(summary, priceMap);
 
     res.json(sectorDistribution);
   } catch (error) {

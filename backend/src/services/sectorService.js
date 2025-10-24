@@ -1,3 +1,7 @@
+import Asset from '../models/Asset.js';
+import FundamentusScraperService from './fundamentusScraperService.js';
+import MarketDataService from './marketDataService.js';
+
 const SECTOR_MAPPING = {
   // Bancos
   'ITUB3': 'Financeiro', 'ITUB4': 'Financeiro', 'BBDC3': 'Financeiro', 'BBDC4': 'Financeiro',
@@ -31,7 +35,7 @@ const SECTOR_MAPPING = {
   'TEND3': 'Construção Civil', 'LAVV3': 'Construção Civil',
 
   // Siderurgia
-  'GGBR4': 'Siderurgia', 'CSNA3': 'Siderurgia', 'USIM5': 'Siderurgia', 'GOAU4': 'Siderurgia',
+  'GGBR4': 'Siderurgia', 'CSNA3': 'Siderurgia', 'USIM5': 'Siderurgia',
 
   // Saúde
   'HAPV3': 'Saúde', 'RDOR3': 'Saúde', 'GNDI3': 'Saúde', 'AALR3': 'Saúde',
@@ -79,12 +83,34 @@ const FII_SECTORS = {
 };
 
 class SectorService {
-  static getSector(ticker, assetType) {
-    const upperTicker = ticker.toUpperCase();
+  static async getSectorFromAPI(ticker) {
+    try {
+      const cleanTicker = ticker.replace('.SA', '');
 
-    if (assetType === 'FII' || assetType === 'REIT') {
-      return FII_SECTORS[upperTicker] || 'FII - Outros';
+      const fundamentusData = await FundamentusScraperService.getDetailedData(cleanTicker);
+      if (fundamentusData?.companyInfo?.sector) {
+        return fundamentusData.companyInfo.sector;
+      }
+    } catch (error) {
+      console.log(`Fundamentus failed for ${ticker}, trying Brapi...`);
     }
+
+    try {
+      const brapiData = await MarketDataService.getFundamentalData(ticker);
+      if (brapiData?.companyInfo?.sector && brapiData.companyInfo.sector !== 'N/A') {
+        return brapiData.companyInfo.sector;
+      }
+    } catch (error) {
+      console.log(`Brapi failed for ${ticker}`);
+    }
+
+    return null;
+  }
+
+  static async getSector(ticker, assetType, useCache = true) {
+    const upperTicker = ticker.toUpperCase();
+    const tickerWithSA = upperTicker.endsWith('.SA') ? upperTicker : `${upperTicker}.SA`;
+    const tickerWithoutSA = upperTicker.replace('.SA', '');
 
     if (assetType === 'CRYPTO') {
       return 'Criptomoedas';
@@ -94,24 +120,71 @@ class SectorService {
       return 'Renda Fixa';
     }
 
-    if (assetType === 'STOCK' || assetType === 'BDR') {
-      return SECTOR_MAPPING[upperTicker] || 'Outros';
+    if (useCache) {
+      const asset = Asset.getByTicker(tickerWithSA) || Asset.getByTicker(tickerWithoutSA);
+      if (asset?.sector) {
+        return asset.sector;
+      }
+    }
+
+    if (assetType === 'FII' || assetType === 'REIT') {
+      const fiiSector = FII_SECTORS[tickerWithoutSA] || 'FII - Outros';
+
+      try {
+        Asset.upsert({
+          ticker: tickerWithSA,
+          name: tickerWithoutSA,
+          type: assetType,
+          market: 'BR',
+          sector: fiiSector
+        });
+      } catch (error) {
+        console.log(`Error saving FII sector: ${error.message}`);
+      }
+
+      return fiiSector;
+    }
+
+    if (assetType === 'STOCK' || assetType === 'BDR' || assetType === 'ACAO_BR') {
+      let sector = SECTOR_MAPPING[tickerWithoutSA];
+
+      if (!sector) {
+        sector = await this.getSectorFromAPI(tickerWithSA);
+      }
+
+      if (sector) {
+        try {
+          Asset.upsert({
+            ticker: tickerWithSA,
+            name: tickerWithoutSA,
+            type: assetType,
+            market: 'BR',
+            sector
+          });
+        } catch (error) {
+          console.log(`Error saving sector: ${error.message}`);
+        }
+
+        return sector;
+      }
+
+      return 'Outros';
     }
 
     return 'Não Classificado';
   }
 
-  static getSectorDistribution(portfolioSummary, priceMap) {
+  static async getSectorDistribution(portfolioSummary, priceMap) {
     const sectorMap = {};
 
-    portfolioSummary.forEach(item => {
-      if (item.total_quantity <= 0) return;
+    for (const item of portfolioSummary) {
+      if (item.total_quantity <= 0) continue;
 
       const currentPrice = priceMap[item.ticker];
-      if (!currentPrice) return;
+      if (!currentPrice) continue;
 
       const value = item.total_quantity * currentPrice;
-      const sector = this.getSector(item.ticker, item.asset_type);
+      const sector = await this.getSector(item.ticker, item.asset_type);
 
       if (!sectorMap[sector]) {
         sectorMap[sector] = {
@@ -131,7 +204,7 @@ class SectorService {
         value,
         invested: item.total_invested
       });
-    });
+    }
 
     return Object.values(sectorMap)
       .map(sector => ({
