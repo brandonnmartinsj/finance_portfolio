@@ -1,4 +1,5 @@
 import axios from 'axios';
+import YahooFinanceService from './yahooFinanceService.js';
 
 class MarketDataService {
   /**
@@ -33,37 +34,7 @@ class MarketDataService {
    * @returns {Promise<Object|null>} Dados da cotação ou null se não encontrado
    */
   static async getStockPrice(ticker) {
-    try {
-      // Usando uma API alternativa gratuita do Yahoo Finance
-      const response = await axios.get(
-        `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}`,
-        {
-          params: {
-            interval: '1d',
-            range: '1d'
-          }
-        }
-      );
-
-      if (response.data && response.data.chart && response.data.chart.result) {
-        const result = response.data.chart.result[0];
-        const price = result.meta.regularMarketPrice;
-        const previousClose = result.meta.previousClose;
-        const change = ((price - previousClose) / previousClose) * 100;
-
-        return {
-          ticker: ticker,
-          price: price,
-          change: change,
-          currency: result.meta.currency,
-          source: 'yahoo'
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error(`Erro ao buscar cotação de ${ticker} no Yahoo Finance:`, error.message);
-      return null;
-    }
+    return await YahooFinanceService.getQuote(ticker);
   }
 
   /**
@@ -168,6 +139,8 @@ class MarketDataService {
             source: 'brapi'
           };
         }
+      } else {
+        return await YahooFinanceService.getFundamentalData(ticker);
       }
 
       return null;
@@ -215,6 +188,8 @@ class MarketDataService {
             source: 'brapi'
           };
         }
+      } else {
+        return await YahooFinanceService.getHistoricalData(ticker, range, interval);
       }
 
       return null;
@@ -226,39 +201,39 @@ class MarketDataService {
 
   /**
    * Retorna histórico de dividendos de um ativo
-   * @todo Integrar com fonte real de dividendos (ex: Fundamentus)
    * @param {string} ticker - Código do ativo
-   * @returns {Promise<Object>} Objeto com histórico de dividendos (mock data)
+   * @param {string} range - Período para buscar dividendos (padrão: 5y)
+   * @returns {Promise<Object>} Objeto com histórico de dividendos
    */
-  static async getDividendHistory(ticker) {
+  static async getDividendHistory(ticker, range = '5y') {
     try {
-      // Nota: A API Brapi não disponibiliza dados de dividendos publicamente
-      // Este endpoint retorna dados mockados para demonstração
-      // Em produção, integrar com fonte de dados de dividendos (ex: Fundamentus)
+      if (ticker.endsWith('.SA')) {
+        // Para ativos brasileiros, dados mockados (implementar Fundamentus posteriormente)
+        const mockDividends = {
+          'PETR4.SA': [
+            { date: '2024-09-15', amount: 1.25, type: 'JCP' },
+            { date: '2024-06-15', amount: 1.10, type: 'DIVIDENDO' },
+            { date: '2024-03-15', amount: 1.15, type: 'JCP' },
+            { date: '2023-12-15', amount: 1.30, type: 'DIVIDENDO' },
+            { date: '2023-09-15', amount: 1.20, type: 'JCP' }
+          ],
+          'VALE3.SA': [
+            { date: '2024-09-01', amount: 2.50, type: 'DIVIDENDO' },
+            { date: '2024-06-01', amount: 2.30, type: 'DIVIDENDO' },
+            { date: '2024-03-01', amount: 2.40, type: 'DIVIDENDO' },
+            { date: '2023-12-01', amount: 2.60, type: 'DIVIDENDO' }
+          ]
+        };
 
-      // Dados mockados para demonstração
-      const mockDividends = {
-        'PETR4.SA': [
-          { date: '2024-09-15', value: 1.25, type: 'JCP' },
-          { date: '2024-06-15', value: 1.10, type: 'DIVIDENDO' },
-          { date: '2024-03-15', value: 1.15, type: 'JCP' },
-          { date: '2023-12-15', value: 1.30, type: 'DIVIDENDO' },
-          { date: '2023-09-15', value: 1.20, type: 'JCP' }
-        ],
-        'VALE3.SA': [
-          { date: '2024-09-01', value: 2.50, type: 'DIVIDENDO' },
-          { date: '2024-06-01', value: 2.30, type: 'DIVIDENDO' },
-          { date: '2024-03-01', value: 2.40, type: 'DIVIDENDO' },
-          { date: '2023-12-01', value: 2.60, type: 'DIVIDENDO' }
-        ]
-      };
-
-      return {
-        ticker,
-        dividends: mockDividends[ticker] || [],
-        source: 'mock',
-        note: 'Dados de demonstração. Integrar com fonte real de dividendos.'
-      };
+        return {
+          ticker,
+          dividends: mockDividends[ticker] || [],
+          source: 'mock',
+          note: 'Dados de demonstração. Use Fundamentus para dados reais.'
+        };
+      } else {
+        return await YahooFinanceService.getDividendHistory(ticker, range);
+      }
     } catch (error) {
       console.error(`Erro ao buscar dividendos de ${ticker}:`, error.message);
       return { ticker, dividends: [], source: 'error' };
@@ -310,6 +285,31 @@ class MarketDataService {
             source: 'brapi'
           };
         }
+      } else {
+        const fundamental = await YahooFinanceService.getFundamentalData(ticker);
+        if (fundamental && fundamental.priceStats) {
+          return {
+            ticker,
+            currentPrice: fundamental.priceStats.currentPrice,
+            currency: fundamental.currency,
+            fiftyTwoWeek: {
+              high: fundamental.priceStats.fiftyTwoWeekHigh,
+              low: fundamental.priceStats.fiftyTwoWeekLow,
+              range: `${fundamental.priceStats.fiftyTwoWeekLow} - ${fundamental.priceStats.fiftyTwoWeekHigh}`
+            },
+            regularMarket: {
+              dayHigh: fundamental.priceStats.dayHigh,
+              dayLow: fundamental.priceStats.dayLow,
+              dayRange: `${fundamental.priceStats.dayLow} - ${fundamental.priceStats.dayHigh}`,
+              change: fundamental.priceStats.currentPrice - fundamental.priceStats.previousClose,
+              changePercent: ((fundamental.priceStats.currentPrice - fundamental.priceStats.previousClose) / fundamental.priceStats.previousClose) * 100,
+              volume: fundamental.priceStats.volume,
+              previousClose: fundamental.priceStats.previousClose,
+              open: fundamental.priceStats.open
+            },
+            source: 'yahoo'
+          };
+        }
       }
 
       return null;
@@ -317,6 +317,28 @@ class MarketDataService {
       console.error(`Erro ao buscar estatísticas de ${ticker}:`, error.message);
       return null;
     }
+  }
+
+  /**
+   * Busca símbolos por termo de pesquisa
+   * @param {string} query - Termo de busca (nome da empresa ou ticker)
+   * @returns {Promise<Array>} Array de símbolos encontrados
+   */
+  static async searchSymbol(query) {
+    return await YahooFinanceService.searchSymbol(query);
+  }
+
+  /**
+   * Busca histórico de splits (desdobramentos) de ações
+   * @param {string} ticker - Código do ativo
+   * @param {string} range - Período (padrão: 5y)
+   * @returns {Promise<Object>} Objeto com histórico de splits
+   */
+  static async getSplitHistory(ticker, range = '5y') {
+    if (!ticker.endsWith('.SA')) {
+      return await YahooFinanceService.getSplitHistory(ticker, range);
+    }
+    return { ticker, splits: [], source: 'not_available' };
   }
 }
 

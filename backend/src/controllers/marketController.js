@@ -212,3 +212,50 @@ export const getFundamentusDividends = async (req, res) => {
     });
   }
 };
+
+/**
+ * Busca símbolos por termo de pesquisa
+ * @param {Object} req - Express request object
+ * @param {Object} req.query - Query parameters
+ * @param {string} req.query.q - Termo de busca
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com array de símbolos encontrados
+ */
+export const searchSymbol = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || q.trim().length === 0) {
+      return res.status(400).json({ error: 'Termo de busca é obrigatório' });
+    }
+
+    const results = await MarketDataService.searchSymbol(q);
+    res.json(results);
+  } catch (error) {
+    console.error(`Error searching for ${req.query.q}:`, error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Retorna histórico de splits (desdobramentos) de ações
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - Parâmetros da URL
+ * @param {string} req.params.ticker - Código do ativo
+ * @param {Object} req.query - Query parameters
+ * @param {string} req.query.range - Período (padrão: 5y)
+ * @param {Object} res - Express response object
+ * @returns {Object} JSON com histórico de splits
+ */
+export const getSplits = async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    const { range = '5y' } = req.query;
+
+    const splits = await MarketDataService.getSplitHistory(ticker, range);
+    res.json(splits);
+  } catch (error) {
+    console.error(`Error fetching splits for ${req.params.ticker}:`, error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
